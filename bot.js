@@ -256,8 +256,26 @@ function guessRandomStringWord() {
     });
 }
 
-//*[@id="challenge"]/div/div[1]/div[2]/div/div/section[1]/div[2]
-//TODO: not working
+
+function saveStringWord(prompt, a1, a2, a3, a4, lessonURL, addedBy){
+    return new Promise(function(fufill, reject){
+        const options = {
+            uri: config.settings.lessonURL + `/stringWord/create`,
+            method: `POST`,
+            data : {
+                prompt: prompt,
+                a1: a1,
+                a2: a2,
+                a3: a3,
+                a4: a4,
+                lessonURL: lessonURL,
+                addedBy: addedBy
+            }
+        }
+    });
+}
+
+
 function isCorrectMultipleChoice() {
     return new Promise(function (fufill, reject) {
         if (count === 1) {
