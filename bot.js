@@ -13,9 +13,12 @@ var config = require('./config');
 var Promise = require('promise');
 var request = require('request-promise');
 var mongoose = require(`mongoose`);
+var qs = require('querystring');
 //the index for the first question in the set of four (images, multiple choice) NOT short answer questions
 var count = 1;
 var apiToken;
+let choices = [1, 2, 3, 4];
+let tempChoices = choices;
 //initialization fun
 var service = new chrome.ServiceBuilder(path).build();
 chrome.setDefaultService(service);
@@ -32,9 +35,6 @@ mongoose.connect(config.database)
         console.log(err);
     });
 
-
-
-
 //Bot cycle
 login()
     .then(function () {
@@ -47,19 +47,7 @@ login()
                         console.log(data);
                         detectTypeAndAnswer()
                             .then(function (type) {
-                                guessRandomStringWord()
-                                    .then(function (randomNumber) {
-                                        isCorrectMultipleChoice(randomNumber)
-                                            .then(function (isCorrect) {
 
-                                            })
-                                            .catch(function (isCorrectError) {
-
-                                            });
-                                    })
-                                    .catch(function (errRandomWord) {
-
-                                    });
                             })
                             .catch(function (errType) {
 
@@ -102,7 +90,7 @@ function getToken() {
             method: `POST`,
             uri: config.api.url + `/login`,
             body: {
-                'username': config.login.username,
+                'name': config.login.username,
                 'password': config.login.password
             },
             json: true
@@ -160,22 +148,122 @@ function detectTypeAndAnswer() {
                                             .then(function (a4) {
                                                 if (prompt.toLowerCase().indexOf('means') != -1 || prompt.toLowerCase().indexOf('opposite') != -1) {
                                                     console.log('This must be a stringWord sentence!');
-                                                    console.log(prompt.replace(/\s/g, '').replace('means', '').replace(':', '').replace('to', ''));
-                                                    findStringWord(prompt.replace(/\s/g, '').replace('means', '').replace(':', '').replace('to', ''), a1, a2, a3, a4)
+                                                    console.log(prompt);
+                                                    findStringWord(prompt, a1, a2, a3, a4)
                                                         .then(function (data) {
-                                                            console.log(`test`);
                                                             //if(!data.answer){
                                                             guessRandomStringWord()
-                                                                .then(function (resp) {
-                                                                    isCorrectMultipleChoice(resp)
-                                                                        .then(function (isCorrect) {
+                                                                .then(function (randomNumber1) {
+                                                                    isCorrectMultipleChoice()
+                                                                        .then(function (isCorrect1) {
+                                                                            if (isCorrect1) {
+                                                                                extractCorrectStringWord(randomNumber1)
+                                                                                    .then(function (correctAnswer1) {
+                                                                                        saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                                                                                            .then(function () {
+                                                                                                console.log(`Saving stringWord!`);
+                                                                                            })
+                                                                                            .catch(function (errSaveStringWord1) {
+                                                                                                console.log(errSaveStringWord1);
+                                                                                            });
+                                                                                    })
+                                                                                    .catch(function (err) {
 
+                                                                                    });
+                                                                            } else if (!isCorrect1) {
+                                                                                guessRandomStringWord()
+                                                                                    .then(function (randomNumber2) {
+                                                                                        isCorrectMultipleChoice()
+                                                                                            .then(function (isCorrect2) {
+                                                                                                if (isCorrect2) {
+                                                                                                    extractCorrectStringWord(randomNumber2)
+                                                                                                        .then(function (correctAnswer2) {
+                                                                                                            saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
+                                                                                                                .then(function () {
+                                                                                                                    console.log(`Saving stringWord!`);
+                                                                                                                })
+                                                                                                                .catch(function (errSaveStringWord2) {
+                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function (err) {
+
+                                                                                                        });
+                                                                                                } else if (!isCorrect2) {
+                                                                                                    guessRandomStringWord()
+                                                                                                        .then(function (randomNumber3) {
+                                                                                                            isCorrectMultipleChoice()
+                                                                                                                .then(function (isCorrect3) {
+                                                                                                                    if (isCorrect3) {
+                                                                                                                        extractCorrectStringWord(randomNumber3)
+                                                                                                                            .then(function (correctAnswer3) {
+                                                                                                                                saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
+                                                                                                                                    .then(function () {
+                                                                                                                                        console.log(`Saving stringWord!`);
+                                                                                                                                    })
+                                                                                                                                    .catch(function (errSaveStringWord3) {
+                                                                                                                                        console.log(errSaveStringWord3);
+                                                                                                                                    });
+                                                                                                                            })
+                                                                                                                            .catch(function (err) {
+
+                                                                                                                            });
+                                                                                                                    } else if (!isCorrect3) {
+                                                                                                                        guessRandomStringWord()
+                                                                                                                            .then(function (randomNumber4) {
+                                                                                                                                isCorrectMultipleChoice()
+                                                                                                                                    .then(function (isCorrect4) {
+                                                                                                                                        if (isCorrect4) {
+                                                                                                                                            extractCorrectStringWord(randomNumber4)
+                                                                                                                                                .then(function (correctAnswer4) {
+                                                                                                                                                    saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
+                                                                                                                                                        .then(function () {
+                                                                                                                                                            console.log(`Saving stringWord!`);
+                                                                                                                                                        })
+                                                                                                                                                        .catch(function (errSaveStringWord4) {
+                                                                                                                                                            console.log(errSaveStringWord4);
+                                                                                                                                                        });
+                                                                                                                                                })
+                                                                                                                                                .catch(function (err) {
+
+                                                                                                                                                });
+                                                                                                                                        } else if (!isCorrect4) {
+
+                                                                                                                                        }
+                                                                                                                                    })
+                                                                                                                                    .catch(function () {
+
+                                                                                                                                    })
+                                                                                                                            })
+                                                                                                                            .catch(function () {
+
+                                                                                                                            });
+                                                                                                                    }
+                                                                                                                })
+                                                                                                                .catch(function () {
+
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function () {
+
+                                                                                                        });
+                                                                                                }
+                                                                                            })
+                                                                                            .catch(function () {
+
+                                                                                            });
+
+                                                                                    })
+                                                                                    .catch(function () {
+
+                                                                                    });
+                                                                            }
                                                                         })
-                                                                        .catch(function (isCorrectError) {
-
+                                                                        .catch(function () {
+                                                                            console.log(isCorrectError);
                                                                         });
                                                                 })
-                                                                .catch(function (errorGuess) {
+                                                                .catch(function (errorGuess1) {
                                                                     console.log(errorGuess);
                                                                 });
                                                             //post new stringWord
@@ -242,52 +330,89 @@ function getRandomIndex() {
     return Math.floor(count + (Math.random() * 3));
 }
 
+//in beta
 function guessRandomStringWord() {
     return new Promise(function (fufill, reject) {
-        var randomNumber = getRandomIndex();
-        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div/div/div/section[1]/div[1]/div[4]/a[' + randomNumber + ']')).click()
+        setTimeout(function () {
+            var randomNumber = Math.floor(Math.random() * tempChoices.length);
+            var randomChoice = tempChoices[randomNumber];
+            console.log(randomChoice);
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div/div/div/section[1]/div[1]/div[4]/a[' + randomChoice + ']')).click()
+                .then(function (resp) {
+                    tempChoices.splice(randomNumber, 1);
+                    console.log(tempChoices);
+                    fufill(randomChoice);
+                })
+                .catch(function (err) {
+                    reject(err);
+                });
+        }, 2000);
+    });
+}
+
+
+function extractCorrectStringWord(correctIndex) {
+    return new Promise(function (fufill, reject) {
+        setTimeout(function () {
+            console.log(`Extracting correct answer!`);
+            var added = count + correctIndex - 1;
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div/div/div/section[1]/div[1]/div[4]/a[' + added + ']')).getText()
+                .then(function (text) {
+                    console.log(text);
+                    fufill(text);
+                })
+                .catch(function (err) {
+                    reject(err);
+                });
+        }, 250);
+    });
+}
+
+function saveStringWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer) {
+    return new Promise(function (fufill, reject) {
+        var postData = {
+            token: apiToken,
+            prompt: prompt,
+            a1: a1,
+            a2: a2,
+            a3: a3,
+            a4: a4,
+            lessonURL: lessonURL,
+            addedBy: addedBy,
+            correctAnswer: correctAnswer
+        };
+        console.log(`Saving stringWord to DB`);
+        const options = {
+            headers: { 'content-type': 'application/x-www-form-urlencoded' },
+            uri: config.api.url + `/stringWord/create`,
+            method: `POST`,
+            body: qs.stringify(postData)
+        }
+        request(options)
             .then(function (resp) {
-                console.log('Success!')
-                fufill(randomNumber);
+                console.log(resp);
+                fufill();
             })
-            .catch(function (err) {
-                reject(err);
+            .catch(function (error) {
+                console.log('ERROR');
+                reject(error);
             });
     });
-}
 
-
-function saveStringWord(prompt, a1, a2, a3, a4, lessonURL, addedBy){
-    return new Promise(function(fufill, reject){
-        const options = {
-            uri: config.settings.lessonURL + `/stringWord/create`,
-            method: `POST`,
-            data : {
-                prompt: prompt,
-                a1: a1,
-                a2: a2,
-                a3: a3,
-                a4: a4,
-                lessonURL: lessonURL,
-                addedBy: addedBy
-            }
-        }
-    });
-}
-
+}//*[@id="challenge"]/div/div[1]/div[2]/div/div/section[1]/div[2]
 
 function isCorrectMultipleChoice() {
     return new Promise(function (fufill, reject) {
-        if (count === 1) {
-            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div/div/div/section[1]/div[2]'))
+        setTimeout(function () {
+            driver.findElement(By.xpath(`//*[@id="challenge"]/div/div[1]/div/div/div/section[1]/div[2]`))
                 .then(function (resp) {
                     resp.getAttribute('class')
                         .then(function (classes) {
                             console.log('This element has classes: ' + classes);
                             if (classes.includes('correct')) {
-                                fufill('Correct!');
+                                fufill(true);
                             } else {
-                                fufill('Incorrect!');
+                                fufill(false);
                             }
                         })
                         .catch(function (errClass) {
@@ -299,31 +424,15 @@ function isCorrectMultipleChoice() {
                     console.log(err);
                     reject(err);
                 });
-        } else {
-            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div[' + count + ']/div/div/section[1]/div[2]'))
-                .then(function(resp){
-                    resp.getAttribute('class')
-                        .then(function(classes){
-                            console.log('This element has classes: ' + classes);
-                            if(classes.includes('correct')){
-                                fufill('Correct!');
-                            } else {
-                                fufill('Incorrect!');
-                            }
-                        })
-                        .catch(function(errClass){
-                            console.log(errClass);
-                            reject(errClass)
-                        });
-                })
-                .catch(function(err){
-                    console.log(err);
-                    reject(err);
-                });
-        }
 
-    });
+
+        });
+    }, 1000);
+
 }
+
+
+
 
 
 

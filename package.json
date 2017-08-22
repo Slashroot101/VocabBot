@@ -23,10 +23,12 @@
   },
   "homepage": "https://github.com/Slashroot101/VocabBot#readme",
   "dependencies": {
+    "async": "^2.5.0",
     "chromedriver": "^2.31.0",
     "moment": "^2.18.1",
-    "mongoose": "^4.11.6",
+    "mongoose": "^4.11.7",
     "promise": "^8.0.1",
+    "querystring": "^0.2.0",
     "request-promise": "^4.2.1",
     "selenium-webdriver": "^3.5.0"
   }
