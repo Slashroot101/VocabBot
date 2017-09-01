@@ -162,6 +162,13 @@ function detectTypeAndAnswer() {
                                                                                         saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
                                                                                             .then(function () {
                                                                                                 console.log(`Saving stringWord!`);
+                                                                                                moveThroughAll()
+                                                                                                    .then(function(){
+                                                                                                        console.log(`Moved through all`);
+                                                                                                    })
+                                                                                                    .catch(function(moveThrough){
+
+                                                                                                    });
                                                                                             })
                                                                                             .catch(function (errSaveStringWord1) {
                                                                                                 console.log(errSaveStringWord1);
@@ -433,6 +440,28 @@ function isCorrectMultipleChoice() {
 
 
 
-
+function moveThroughAll(){
+    return new Promise(function(resolve, reject){
+        for(let i = 0; i < 10; i++) {
+            driver.findElement(By.xpath(`//*[@id="challenge"]/div/div[2]/button`)).getAttribute(`class`)
+                .then(function(classes){
+                    if(classes.includes(`active`)){
+                        driver.findElement(By.xpath(`//*[@id="challenge"]/div/div[2]/button`)).click()
+                            .then(function(clicked){
+                                console.log(i);
+                            })
+                            .catch(function(errClick){
+                                reject(errClick);
+                            });
+                    } else {
+                        return;
+                    }
+                })
+                .catch(function(err){
+                    reject(err);
+                });
+        }
+    });
+}
 
 
