@@ -10,7 +10,7 @@ module.exports =
         password: 'sam42182'
     },
     settings: {
-        lessonURL: 'https://www.vocabulary.com/lists/1806744'
+        lessonURL: 'https://www.vocabulary.com/lists/52473/practice'
     },
     api: {
         url: 'http://localhost:3000'
