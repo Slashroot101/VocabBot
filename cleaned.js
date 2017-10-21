@@ -75,15 +75,18 @@ function start() {
 */
 //this function does all of the driving (moving from question to question, etc)
 function assignmentDriver() {
-    isMovable(function(){
+    if (stringWordCount === 11) {
+        stringWordCount = 1;
+    }
+    isMovable(function() {
         console.log('Finished moving!'.blue);
         tempChoices = [1, 2, 3, 4];
         questionDriver()
-            .then(function(){
-        
+            .then(function() {
+
             })
-            .catch(function(answerErr){
-        
+            .catch(function(answerErr) {
+
             });
     });
 }
@@ -109,481 +112,919 @@ function assignmentDriver() {
 
     question TypeD TypeS = stringWord
     question TypeL TypeP TypeH = sentenceWord
+    question typeA = oppositeWord
     question TypeF = paragraphWord
     question TypeI = imageWord
+    question TypeT = audioWord
 
 */
-function questionDriver(){
-    return new Promise(function(fufilled, reject){
-        if(stringWordCount > 1){
-            var countString = '['+ stringWordCount + ']';
+function questionDriver() {
+    return new Promise(function(fufilled, reject) {
+        if (stringWordCount > 1) {
+            var countString = '[' + stringWordCount + ']';
         } else {
             var countString = '';
         }
-       driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div'+ countString +'/div/div/section[1]/div[1]'))
-            .then(function(dClass){
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]'))
+            .then(function(dClass) {
                 console.log('Assesing the question type!'.blue);
                 dClass.getAttribute('class')
-                    .then(function(divClass){
+                    .then(function(divClass) {
                         console.log(divClass);
-                        if(divClass.includes('typeD') || divClass.includes('typeS')){
+                        if (divClass.includes('typeD') || divClass.includes('typeS')) {
                             console.log('Stringword'.yellow);
                             answerStringWord()
-                                .then(function(){
+                                .then(function() {
                                     assignmentDriver();
                                 })
-                                .catch(function(errSW){
+                                .catch(function(errSW) {
 
                                 });
-                        } else if (divClass.includes('typeL') || divClass.includes('typeP') || divClass.includes('typeH')){
+                        } else if (divClass.includes('typeL') || divClass.includes('typeP') || divClass.includes('typeH')) {
                             console.log('SentenceWord'.yellow);
                             answerSentenceWord()
-                                .then(function(){
+                                .then(function() {
                                     assignmentDriver();
                                 })
-                                .catch(function(errS){
+                                .catch(function(errS) {
                                     assignmentDriver();
                                 })
-                        } else if (divClass.includes('typeF')){
+                        } else if (divClass.includes('typeF')) {
                             console.log('ParagraphWord'.yellow);
+                            answerParagraphWord()
+                                .then(function() {
+                                    assignmentDriver();
+                                })
+                                .catch(function(errPara) {
+                                    assignmentDriver();
+                                });
+                        } else if (divClass.includes('typeI')) {
+                            console.log('ImageWord'.yellow);
+                            answerImageWord()
+                                .then(function() {
+                                    assignmentDriver();
+                                })
+                                .catch(function(errImage) {
+                                    console.log(errImage);
+                                });
                         }
                     })
-                    .catch(function(errClass){
+                    .catch(function(errClass) {
                         console.log(errClass);
                     });
             })
-            .catch(function(errDiv){
+            .catch(function(errDiv) {
 
             });
     });
 }
 
+function answerImageWord() {
+    return new Promise(function(fufill, reject) {
+        if (stringWordCount > 1) {
+            var countString = '[' + stringWordCount + ']';
+        } else {
+            var countString = '';
+        }
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[1]')).getAttribute('nonce')
+            .then(function(a1) {
+                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[2]')).getAttribute('nonce')
+                    .then(function(a2) {
+                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[3]')).getAttribute('nonce')
+                            .then(function(a3) {
+                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[4]')).getAttribute('nonce')
+                                    .then(function(a4) {
+                                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[3]/div')).getAttribute('innerText')
+                                            .then(function(prompt) {
+                                                findImageWord(prompt, a1, a2, a3, a4)
+                                                    .then(function(data) {
+                                                        console.log(data);
+                                                        if (data.answer) {
+                                                            if (data.answer === a1) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[1]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 1!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka1) {
+                                                                        console.log(clicka1);
+                                                                        reject(clicka1);
+                                                                    });
+                                                            } else if (data.answer === a2) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[2]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 2!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka2) {
+                                                                        console.log(clicka2);
+                                                                        reject(clicka2);
+                                                                    });
+                                                            } else if (data.answer === a3) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[3]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 3!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka3) {
+                                                                        console.log(clicka3);
+                                                                        reject(clicka3);
+                                                                    });
+                                                            } else if (data.answer === a4) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[4]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 4!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka4) {
+                                                                        console.log(clicka4);
+                                                                        reject(clicka4);
+                                                                    });
+                                                            }
+                                                        } else {
+                                                            guessRandomImageWord()
+                                                                .then(function(randomNumber1) {
+                                                                    isCorrectMultipleChoice()
+                                                                        .then(function(isCorrect1) {
+                                                                            if (isCorrect1) {
+                                                                                extractCorrectImageWord(randomNumber1)
+                                                                                    .then(function(correctAnswer1) {
+                                                                                        stringWordCount++;
+                                                                                        saveImageWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                                                                                            .then(function() {
+                                                                                                console.log('Saving imageWord!'.blue);
+
+                                                                                                fufill();
+                                                                                            })
+                                                                                            .catch(function(errSaveStringWord1) {
+                                                                                                console.log(errSaveStringWord1);
+                                                                                            });
+                                                                                    })
+                                                                                    .catch(function(err) {
+                                                                                        console.log(err);
+                                                                                    });
+                                                                            } else {
+                                                                                guessRandomImageWord()
+                                                                                    .then(function(randomNumber2) {
+                                                                                        isCorrectMultipleChoice()
+                                                                                            .then(function(isCorrect2) {
+                                                                                                if (isCorrect2) {
+                                                                                                    extractCorrectImageWord(randomNumber2)
+                                                                                                        .then(function(correctAnswer2) {
+                                                                                                            stringWordCount++;
+                                                                                                            saveImageWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
+                                                                                                                .then(function() {
+                                                                                                                    console.log('Saving imageWord!'.blue);
+                                                                                                                    fufill();
+                                                                                                                })
+                                                                                                                .catch(function(errSaveStringWord2) {
+                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(err) {
+                                                                                                            console.log(err);
+                                                                                                        });
+                                                                                                } else {
+                                                                                                    guessRandomImageWord()
+                                                                                                        .then(function(randomNumber3) {
+                                                                                                            isCorrectMultipleChoice()
+                                                                                                                .then(function(isCorrect3) {
+                                                                                                                    if (isCorrect3) {
+                                                                                                                        extractCorrectImageWord(randomNumber3)
+                                                                                                                            .then(function(correctAnswer3) {
+                                                                                                                                stringWordCount++;
+                                                                                                                                saveImageWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
+                                                                                                                                    .then(function() {
+                                                                                                                                        console.log('Saving imageWord!'.blue);
+                                                                                                                                        fufill();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                    });
+                                                                                                                            })
+                                                                                                                    } else {
+                                                                                                                        guessRandomImageWord()
+                                                                                                                            .then(function(randomNumber4) {
+                                                                                                                                isCorrectMultipleChoice()
+                                                                                                                                    .then(function(isCorrect4) {
+                                                                                                                                        extractCorrectImageWord(randomNumber4)
+                                                                                                                                            .then(function(correctAnswer4) {
+                                                                                                                                                stringWordCount++;
+                                                                                                                                                saveImageWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        console.log('Saving imageWord!'.blue);
+                                                                                                                                                        fufill();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                    });
+                                                                                                                                            })
+                                                                                                                                            .catch(function(correctAnswer4Err) {
+                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                            });
+                                                                                                                                    })
+                                                                                                                                    .catch(function(isCorrect4Err) {
+                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                    })
+                                                                                                                            })
+                                                                                                                            .catch(function(randomNumber4Err) {
+                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                            });
+                                                                                                                    }
+                                                                                                                })
+                                                                                                                .catch(function(isCorrect3Err) {
+                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(randomNumber3Err) {
+                                                                                                            console.log(randomNumber3Err);
+                                                                                                        });
+                                                                                                }
+                                                                                            })
+                                                                                            .catch(function(isCorrect2Err) {
+                                                                                                console.log(isCorrect2Err);
+                                                                                            })
+                                                                                    })
+                                                                                    .catch(function(randomNumber2Err) {
+                                                                                        console.log(randomNumber2Err);
+                                                                                    });
+                                                                            }
+                                                                        })
+                                                                        .catch(function(isCorrect1Err) {
+                                                                            console.log(isCorrect1Err);
+                                                                        })
+                                                                })
+                                                                .catch(function(randomNumber1Err) {
+                                                                    console.log(randomNumber1Err);
+                                                                });
+                                                        }
+                                                    })
+                                                    .catch(function(errImageWord) {
+                                                        console.log(errImageWord);
+                                                    });
+                                            })
+                                            .catch(function(imageErr4) {
+                                                console.log(imageErr4);
+                                            });
+                                    })
+                                    .catch(function(imageErr3) {
+                                        console.log(imageErr3);
+                                    });
+                            })
+                            .catch(function(imageErr2) {
+                                console.log(imageErr2);
+                            });
+                    })
+                    .catch(function(imageErr1) {
+                        console.log(imageErr1);
+                    });
+            })
+            .catch(function(errPrompt) {
+                console.log(errPrompt);
+            })
+
+    });
+}
 
 
-function answerStringWord() {
-    return new Promise(function(fufill, reject){
-        if(stringWordCount > 1){
+function answerParagraphWord() {
+    return new Promise(function(fufill, reject) {
+        if (stringWordCount > 1) {
             var countString = '[' + stringWordCount + ']';
         } else {
             var countString = '';
         }
         driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).getText()
-        .then(function(a1) {
-            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[3]')).getText()
-            .then(function(prompt) {
+            .then(function(a1) {
                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).getText()
-                .then(function(a2) {
-                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).getText()
-                    .then(function(a3) {
-                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).getText()
-                        .then(function(a4) {
-                            console.log(a4);
-                            //try to pull data from the prompt, if not found, guess and save the correct answer
-                            findStringWord(prompt, a1, a2, a3,a4)
-                                .then(function(data){
-                                    console.log(data);
-                                    if(data.answer){
-                                        //TODO: check if its correct
-                                        if(data.answer === a1){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[' + count + ']')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 1!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka1){
-                                                console.log(clicka1);
-                                                reject(clicka1);
-                                            });
-                                        } else if (data.answer === a2){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[' + (count + 1) + ']')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 2!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka2){
-                                                console.log(clicka2);
-                                                reject(clicka2);
-                                            });
-                                        } else if (data.answer === a3){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[' + (count + 2) + ']')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 3!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka3){
-                                                console.log(clicka3);
-                                                reject(clicka3);
-                                            });
-                                        } else if (data.answer === a4){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[' + (count + 3) + ']')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 4!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka4){
-                                                console.log(clicka4);
-                                                reject(clicka4);
-                                            });
-                                        }
-                                    } else if(!data.answer){
-                                        guessRandomStringWord()
-                                            .then(function(randomNumber1){
-                                                isCorrectMultipleChoice()
-                                                    .then(function(isCorrect1){
-                                                        if(isCorrect1){
-                                                            extractCorrectStringWord(randomNumber1)
-                                                            .then(function(correctAnswer1) {
-                                                                stringWordCount++;
-                                                                saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                    .then(function(a2) {
+                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).getText()
+                            .then(function(a3) {
+                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).getText()
+                                    .then(function(a4) {
+                                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div')).getText()
+                                            .then(function(prompt) {
+                                                findParagraphWord(prompt, a1, a2, a3, a4)
+                                                    .then(function(data) {
+                                                        console.log(data);
+                                                        if (data.answer) {
+                                                            if (data.answer === a1) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).click()
                                                                     .then(function() {
-                                                                        console.log('Saving stringWord!'.blue);
-
+                                                                        console.log('Clicked answer 1!'.blue);
+                                                                        stringWordCount++;
                                                                         fufill();
                                                                     })
-                                                                    .catch(function(errSaveStringWord1) {
-                                                                        console.log(errSaveStringWord1);
+                                                                    .catch(function(clicka1) {
+                                                                        console.log(clicka1);
+                                                                        reject(clicka1);
                                                                     });
-                                                            })
-                                                            .catch(function(err) {
-    
-                                                            }); 
+                                                            } else if (data.answer === a2) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 2!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka2) {
+                                                                        console.log(clicka2);
+                                                                        reject(clicka2);
+                                                                    });
+                                                            } else if (data.answer === a3) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 3!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka3) {
+                                                                        console.log(clicka3);
+                                                                        reject(clicka3);
+                                                                    });
+                                                            } else if (data.answer === a4) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 4!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka4) {
+                                                                        console.log(clicka4);
+                                                                        reject(clicka4);
+                                                                    });
+                                                            }
                                                         } else {
+                                                            console.log('About to guess a random paragraphWord');
                                                             guessRandomStringWord()
-                                                            .then(function(randomNumber2){
-                                                                isCorrectMultipleChoice()
-                                                                    .then(function(isCorrect2){
-                                                                        if(isCorrect2){
-                                                                            extractCorrectStringWord(randomNumber2)
-                                                                            .then(function(correctAnswer2) {
-                                                                                stringWordCount++;
-                                                                                saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
-                                                                                    .then(function() {
-                                                                                        console.log('Saving stringWord!'.blue);
-                                                                                        fufill();
+                                                                .then(function(randomNumber1) {
+                                                                    isCorrectMultipleChoice()
+                                                                        .then(function(isCorrect1) {
+                                                                            if (isCorrect1) {
+                                                                                extractCorrectParagraphWord(randomNumber1)
+                                                                                    .then(function(correctAnswer1) {
+                                                                                        stringWordCount++;
+                                                                                        saveParagraphWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                                                                                            .then(function() {
+                                                                                                console.log('Saving paragraphWord!'.blue);
+
+                                                                                                fufill();
+                                                                                            })
+                                                                                            .catch(function(errSaveStringWord1) {
+                                                                                                console.log(errSaveStringWord1);
+                                                                                            });
                                                                                     })
-                                                                                    .catch(function(errSaveStringWord2) {
-                                                                                        console.log(errSaveStringWord2);
+                                                                                    .catch(function(err) {
+
                                                                                     });
-                                                                            })
-                                                                            .catch(function(err) {
-                    
-                                                                            }); 
-                                                                        } else {
-                                                                            guessRandomStringWord()
-                                                                                .then(function(randomNumber3){
-                                                                                    isCorrectMultipleChoice()
-                                                                                        .then(function(isCorrect3){
-                                                                                            if(isCorrect3){
-                                                                                                extractCorrectStringWord(randomNumber3)
-                                                                                                .then(function(correctAnswer3){
-                                                                                                    stringWordCount++;
-                                                                                                    saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
-                                                                                                    .then(function() {
-                                                                                                        console.log('Saving stringWord!'.blue);
-                                                                                                        fufill();
-                                                                                                    })
-                                                                                                    .catch(function(errSaveStringWord2) {
-                                                                                                        console.log(errSaveStringWord2);
-                                                                                                    });
-                                                                                                })
-                                                                                            } else {
-                                                                                                guessRandomStringWord()
-                                                                                                    .then(function(randomNumber4){
-                                                                                                        isCorrectMultipleChoice()
-                                                                                                            .then(function(isCorrect4){
-                                                                                                                extractCorrectStringWord(randomNumber4)
-                                                                                                                    .then(function(correctAnswer4){
-                                                                                                                        stringWordCount++;
-                                                                                                                        console.log('Preparing to save!'.blue);
-                                                                                                                        saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
-                                                                                                                        .then(function() {
-                                                                                                                            console.log('Saving stringWord!'.blue);
-                                                                                                                            fufill();
-                                                                                                                        })
-                                                                                                                        .catch(function(errSaveStringWord2) {
-                                                                                                                            console.log(errSaveStringWord2);
-                                                                                                                        });
-                                                                                                                    })
-                                                                                                                    .catch(function(correctAnswer4Err){
-                                                                                                                        console.log(correctAnswer4Err);
-                                                                                                                    });
-                                                                                                            })
-                                                                                                            .catch(function(isCorrect4Err){
-                                                                                                                console.log(isCorrect4Err);
-                                                                                                            })
-                                                                                                    })
-                                                                                                    .catch(function(randomNumber4Err){
-                                                                                                        console.log(randomNumber4Err);
-                                                                                                    });
-                                                                                            }
-                                                                                        })
-                                                                                        .catch(function(isCorrect3Err){
-                                                                                            console.log(isCorrect3Err);
-                                                                                        });
-                                                                                })
-                                                                                .catch(function(randomNumber3Err){
-                                                                                    console.log(randomNumber3Err);
-                                                                                });
-                                                                        }
-                                                                    })
-                                                                    .catch(function(isCorrect2Err){
-                                                                        console.log(isCorrect2Err);
-                                                                    })
-                                                            })
-                                                            .catch(function(randomNumber2Err){
-                                                                console.log(randomNumber2Err);
-                                                            });
+                                                                            } else {
+                                                                                guessRandomStringWord()
+                                                                                    .then(function(randomNumber2) {
+                                                                                        isCorrectMultipleChoice()
+                                                                                            .then(function(isCorrect2) {
+                                                                                                if (isCorrect2) {
+                                                                                                    extractCorrectParagraphWord(randomNumber2)
+                                                                                                        .then(function(correctAnswer2) {
+                                                                                                            stringWordCount++;
+                                                                                                            saveParagraphWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
+                                                                                                                .then(function() {
+                                                                                                                    console.log('Saving paragraphWord!'.blue);
+                                                                                                                    fufill();
+                                                                                                                })
+                                                                                                                .catch(function(errSaveStringWord2) {
+                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(err) {
+
+                                                                                                        });
+                                                                                                } else {
+                                                                                                    guessRandomStringWord()
+                                                                                                        .then(function(randomNumber3) {
+                                                                                                            isCorrectMultipleChoice()
+                                                                                                                .then(function(isCorrect3) {
+                                                                                                                    if (isCorrect3) {
+                                                                                                                        extractCorrectParagraphWord(randomNumber3)
+                                                                                                                            .then(function(correctAnswer3) {
+                                                                                                                                stringWordCount++;
+                                                                                                                                saveParagraphWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
+                                                                                                                                    .then(function() {
+                                                                                                                                        console.log('Saving paragraphWord!'.blue);
+                                                                                                                                        fufill();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                    });
+                                                                                                                            })
+                                                                                                                    } else {
+                                                                                                                        guessRandomStringWord()
+                                                                                                                            .then(function(randomNumber4) {
+                                                                                                                                isCorrectMultipleChoice()
+                                                                                                                                    .then(function(isCorrect4) {
+                                                                                                                                        extractCorrectParagraphWord(randomNumber4)
+                                                                                                                                            .then(function(correctAnswer4) {
+                                                                                                                                                stringWordCount++;
+                                                                                                                                                saveParagraphWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        console.log('Saving paragraphWord!'.blue);
+                                                                                                                                                        fufill();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                    });
+                                                                                                                                            })
+                                                                                                                                            .catch(function(correctAnswer4Err) {
+                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                            });
+                                                                                                                                    })
+                                                                                                                                    .catch(function(isCorrect4Err) {
+                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                    })
+                                                                                                                            })
+                                                                                                                            .catch(function(randomNumber4Err) {
+                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                            });
+                                                                                                                    }
+                                                                                                                })
+                                                                                                                .catch(function(isCorrect3Err) {
+                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(randomNumber3Err) {
+                                                                                                            console.log(randomNumber3Err);
+                                                                                                        });
+                                                                                                }
+                                                                                            })
+                                                                                            .catch(function(isCorrect2Err) {
+                                                                                                console.log(isCorrect2Err);
+                                                                                            })
+                                                                                    })
+                                                                                    .catch(function(randomNumber2Err) {
+                                                                                        console.log(randomNumber2Err);
+                                                                                    });
+                                                                            }
+                                                                        })
+                                                                        .catch(function(isCorrect1Err) {
+                                                                            console.log(isCorrect1Err);
+                                                                        })
+                                                                })
+                                                                .catch(function(randomNumber1Err) {
+                                                                    console.log(randomNumber1Err);
+                                                                });
                                                         }
                                                     })
-                                                    .catch(function(isCorrect1Err){
-                                                        console.log(isCorrect1Err);
-                                                    })
+                                                    .catch(function(errData) {
+                                                        console.log(errData);
+                                                    });
                                             })
-                                            .catch(function(randomNumber1Err){
-                                                console.log(randomNumber1Err);
+                                            .catch(function(errPrompt) {
+                                                console.log(errPrompt);
                                             });
-                                    }
-                                })
-                                .catch(function(findSWErr){
-                                    console.log(findSWerr);
-                                });
-                        })
-                        .catch(function(erra4){
-                            console.log(erra4);
-                        });
+                                    })
+                                    .catch(function(errA4) {
+                                        console.log(errA4);
+                                    });
+                            })
+                            .catch(function(errA3) {
+                                console.log(errA3);
+                            });
                     })
-                    .catch(function(erra3){
-                        console.log(erra3);
+                    .catch(function(errA2) {
+                        console.log(errA2);
                     });
-                })
-                .catch(function(erra2){
-                    console.log(erra2);
-                });
             })
-            .catch(function(errPrompt){
-                console.log(errPrompt);
+            .catch(function(errA1) {
+                console.log(errA1);
             });
-        })
-        .catch(function(erra1){
-            console.log(erra1);
-        });
+    });
+}
+
+function answerStringWord() {
+    return new Promise(function(fufill, reject) {
+        if (stringWordCount > 1) {
+            var countString = '[' + stringWordCount + ']';
+        } else {
+            var countString = '';
+        }
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).getText()
+            .then(function(a1) {
+                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[3]')).getText()
+                    .then(function(prompt) {
+                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).getText()
+                            .then(function(a2) {
+                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).getText()
+                                    .then(function(a3) {
+                                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).getText()
+                                            .then(function(a4) {
+                                                //try to pull data from the prompt, if not found, guess and save the correct answer
+                                                findStringWord(prompt, a1, a2, a3, a4)
+                                                    .then(function(data) {
+                                                        console.log(data);
+                                                        if (data.answer) {
+                                                            //TODO: check if its correct
+                                                            if (data.answer === a1) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[1]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 1!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka1) {
+                                                                        console.log(clicka1);
+                                                                        reject(clicka1);
+                                                                    });
+                                                            } else if (data.answer === a2) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[2]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 2!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka2) {
+                                                                        console.log(clicka2);
+                                                                        reject(clicka2);
+                                                                    });
+                                                            } else if (data.answer === a3) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[3]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 3!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka3) {
+                                                                        console.log(clicka3);
+                                                                        reject(clicka3);
+                                                                    });
+                                                            } else if (data.answer === a4) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[4]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 4!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka4) {
+                                                                        console.log(clicka4);
+                                                                        reject(clicka4);
+                                                                    });
+                                                            }
+                                                        } else if (!data.answer) {
+                                                            guessRandomStringWord()
+                                                                .then(function(randomNumber1) {
+                                                                    isCorrectMultipleChoice()
+                                                                        .then(function(isCorrect1) {
+                                                                            if (isCorrect1) {
+                                                                                extractCorrectStringWord(randomNumber1)
+                                                                                    .then(function(correctAnswer1) {
+                                                                                        stringWordCount++;
+                                                                                        saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                                                                                            .then(function() {
+                                                                                                console.log('Saving stringWord!'.blue);
+
+                                                                                                fufill();
+                                                                                            })
+                                                                                            .catch(function(errSaveStringWord1) {
+                                                                                                console.log(errSaveStringWord1);
+                                                                                            });
+                                                                                    })
+                                                                                    .catch(function(err) {
+
+                                                                                    });
+                                                                            } else {
+                                                                                guessRandomStringWord()
+                                                                                    .then(function(randomNumber2) {
+                                                                                        isCorrectMultipleChoice()
+                                                                                            .then(function(isCorrect2) {
+                                                                                                if (isCorrect2) {
+                                                                                                    extractCorrectStringWord(randomNumber2)
+                                                                                                        .then(function(correctAnswer2) {
+                                                                                                            stringWordCount++;
+                                                                                                            saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
+                                                                                                                .then(function() {
+                                                                                                                    console.log('Saving stringWord!'.blue);
+                                                                                                                    fufill();
+                                                                                                                })
+                                                                                                                .catch(function(errSaveStringWord2) {
+                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(err) {
+
+                                                                                                        });
+                                                                                                } else {
+                                                                                                    guessRandomStringWord()
+                                                                                                        .then(function(randomNumber3) {
+                                                                                                            isCorrectMultipleChoice()
+                                                                                                                .then(function(isCorrect3) {
+                                                                                                                    if (isCorrect3) {
+                                                                                                                        extractCorrectStringWord(randomNumber3)
+                                                                                                                            .then(function(correctAnswer3) {
+                                                                                                                                stringWordCount++;
+                                                                                                                                saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
+                                                                                                                                    .then(function() {
+                                                                                                                                        console.log('Saving stringWord!'.blue);
+                                                                                                                                        fufill();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                    });
+                                                                                                                            })
+                                                                                                                    } else {
+                                                                                                                        guessRandomStringWord()
+                                                                                                                            .then(function(randomNumber4) {
+                                                                                                                                isCorrectMultipleChoice()
+                                                                                                                                    .then(function(isCorrect4) {
+                                                                                                                                        extractCorrectStringWord(randomNumber4)
+                                                                                                                                            .then(function(correctAnswer4) {
+                                                                                                                                                stringWordCount++;
+                                                                                                                                                console.log('Preparing to save!'.blue);
+                                                                                                                                                saveStringWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        console.log('Saving stringWord!'.blue);
+                                                                                                                                                        fufill();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                    });
+                                                                                                                                            })
+                                                                                                                                            .catch(function(correctAnswer4Err) {
+                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                            });
+                                                                                                                                    })
+                                                                                                                                    .catch(function(isCorrect4Err) {
+                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                    })
+                                                                                                                            })
+                                                                                                                            .catch(function(randomNumber4Err) {
+                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                            });
+                                                                                                                    }
+                                                                                                                })
+                                                                                                                .catch(function(isCorrect3Err) {
+                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(randomNumber3Err) {
+                                                                                                            console.log(randomNumber3Err);
+                                                                                                        });
+                                                                                                }
+                                                                                            })
+                                                                                            .catch(function(isCorrect2Err) {
+                                                                                                console.log(isCorrect2Err);
+                                                                                            })
+                                                                                    })
+                                                                                    .catch(function(randomNumber2Err) {
+                                                                                        console.log(randomNumber2Err);
+                                                                                    });
+                                                                            }
+                                                                        })
+                                                                        .catch(function(isCorrect1Err) {
+                                                                            console.log(isCorrect1Err);
+                                                                        })
+                                                                })
+                                                                .catch(function(randomNumber1Err) {
+                                                                    console.log(randomNumber1Err);
+                                                                });
+                                                        }
+                                                    })
+                                                    .catch(function(findSWErr) {
+                                                        console.log(findSWerr);
+                                                    });
+                                            })
+                                            .catch(function(erra4) {
+                                                console.log(erra4);
+                                            });
+                                    })
+                                    .catch(function(erra3) {
+                                        console.log(erra3);
+                                    });
+                            })
+                            .catch(function(erra2) {
+                                console.log(erra2);
+                            });
+                    })
+                    .catch(function(errPrompt) {
+                        console.log(errPrompt);
+                    });
+            })
+            .catch(function(erra1) {
+                console.log(erra1);
+            });
     });
 }
 
 function answerSentenceWord() {
-    return new Promise(function(fufill, reject){
-        if(stringWordCount > 1){
-            var countString = '['+ stringWordCount + ']';
+    return new Promise(function(fufill, reject) {
+        if (stringWordCount > 1) {
+            var countString = '[' + stringWordCount + ']';
         } else {
             var countString = '';
         }
         //*[@id="challenge"]/div/div[1]/div[4]/div/div/section[1]/div[1]/div[4]/a[1]
         driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).getText()
-        .then(function(a1) {
-            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString +'/div/div/section[1]/div[1]/div[2]/div')).getText()
-            .then(function(prompt) {
-                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).getText()
-                .then(function(a2) {
-                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).getText()
-                    .then(function(a3) {
-                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).getText()
-                        .then(function(a4) {
-                            //try to pull data from the prompt, if not found, guess and save the correct answer
-                            findStringWord(prompt, a1, a2, a3,a4)
-                                .then(function(data){
-                                    console.log(data);
-                                    if(data.answer){
-                                        //TODO: check if its correct
-                                        if(data.answer === a1){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[1]')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 1!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka1){
-                                                console.log(clicka1);
-                                                reject(clicka1);
-                                            });
-                                        } else if (data.answer === a2){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[2]')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 2!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka2){
-                                                console.log(clicka2);
-                                                reject(clicka2);
-                                            });
-                                        } else if (data.answer === a3){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[3]')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 3!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka3){
-                                                console.log(clicka3);
-                                                reject(clicka3);
-                                            });
-                                        } else if (data.answer === a4){
-                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[4]')).click()
-                                            .then(function() {
-                                                console.log('Clicked answer 4!'.blue);
-                                                stringWordCount++;
-                                                fufill();
-                                            })
-                                            .catch(function(clicka4){
-                                                console.log(clicka4);
-                                                reject(clicka4);
-                                            });
-                                        }
-                                    } else if(!data.answer){
-                                        guessRandomStringWord()
-                                            .then(function(randomNumber1){
-                                                isCorrectMultipleChoice()
-                                                    .then(function(isCorrect1){
-                                                        if(isCorrect1){
-                                                            extractCorrectSentenceWord(randomNumber1)
-                                                            .then(function(correctAnswer1) {
-                                                                stringWordCount++;
-                                                                saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+            .then(function(a1) {
+                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div')).getText()
+                    .then(function(prompt) {
+                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).getText()
+                            .then(function(a2) {
+                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).getText()
+                                    .then(function(a3) {
+                                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).getText()
+                                            .then(function(a4) {
+                                                //try to pull data from the prompt, if not found, guess and save the correct answer
+                                                findSentenceWord(prompt, a1, a2, a3, a4)
+                                                    .then(function(data) {
+                                                        console.log(data);
+                                                        if (data.answer) {
+                                                            //TODO: check if its correct
+                                                            if (data.answer === a1) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[1]')).click()
                                                                     .then(function() {
-                                                                        console.log('Saving sentenceWord!'.blue);
-
+                                                                        console.log('Clicked answer 1!'.blue);
+                                                                        stringWordCount++;
                                                                         fufill();
                                                                     })
-                                                                    .catch(function(errSaveStringWord1) {
-                                                                        console.log(errSaveStringWord1);
+                                                                    .catch(function(clicka1) {
+                                                                        console.log(clicka1);
+                                                                        reject(clicka1);
                                                                     });
-                                                            })
-                                                            .catch(function(err) {
-    
-                                                            }); 
-                                                        } else {
+                                                            } else if (data.answer === a2) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[2]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 2!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka2) {
+                                                                        console.log(clicka2);
+                                                                        reject(clicka2);
+                                                                    });
+                                                            } else if (data.answer === a3) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[3]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 3!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka3) {
+                                                                        console.log(clicka3);
+                                                                        reject(clicka3);
+                                                                    });
+                                                            } else if (data.answer === a4) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[4]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 4!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka4) {
+                                                                        console.log(clicka4);
+                                                                        reject(clicka4);
+                                                                    });
+                                                            }
+                                                        } else if (!data.answer) {
                                                             guessRandomStringWord()
-                                                            .then(function(randomNumber2){
-                                                                isCorrectMultipleChoice()
-                                                                    .then(function(isCorrect2){
-                                                                        if(isCorrect2){
-                                                                            extractCorrectSentenceWord(randomNumber2)
-                                                                            .then(function(correctAnswer2) {
-                                                                                stringWordCount++;
-                                                                                saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
-                                                                                    .then(function() {
-                                                                                        console.log('Saving sentenceWord!'.blue);
-                                                                                        fufill();
+                                                                .then(function(randomNumber1) {
+                                                                    isCorrectMultipleChoice()
+                                                                        .then(function(isCorrect1) {
+                                                                            if (isCorrect1) {
+                                                                                extractCorrectSentenceWord(randomNumber1)
+                                                                                    .then(function(correctAnswer1) {
+                                                                                        stringWordCount++;
+                                                                                        saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                                                                                            .then(function() {
+                                                                                                console.log('Saving sentenceWord!'.blue);
+
+                                                                                                fufill();
+                                                                                            })
+                                                                                            .catch(function(errSaveStringWord1) {
+                                                                                                console.log(errSaveStringWord1);
+                                                                                            });
                                                                                     })
-                                                                                    .catch(function(errSaveStringWord2) {
-                                                                                        console.log(errSaveStringWord2);
+                                                                                    .catch(function(err) {
+
                                                                                     });
-                                                                            })
-                                                                            .catch(function(err) {
-                    
-                                                                            }); 
-                                                                        } else {
-                                                                            guessRandomStringWord()
-                                                                                .then(function(randomNumber3){
-                                                                                    isCorrectMultipleChoice()
-                                                                                        .then(function(isCorrect3){
-                                                                                            if(isCorrect3){
-                                                                                                extractCorrectSentenceWord(randomNumber3)
-                                                                                                .then(function(correctAnswer3){
-                                                                                                    stringWordCount++;
-                                                                                                    saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
-                                                                                                    .then(function() {
-                                                                                                        console.log('Saving sentenceWord!'.blue);
-                                                                                                        fufill();
-                                                                                                    })
-                                                                                                    .catch(function(errSaveStringWord2) {
-                                                                                                        console.log(errSaveStringWord2);
-                                                                                                    });
-                                                                                                })
-                                                                                            } else {
-                                                                                                guessRandomStringWord()
-                                                                                                    .then(function(randomNumber4){
-                                                                                                        isCorrectMultipleChoice()
-                                                                                                            .then(function(isCorrect4){
-                                                                                                                extractCorrectSentenceWord(randomNumber4)
-                                                                                                                    .then(function(correctAnswer4){
-                                                                                                                        stringWordCount++;
-                                                                                                                        saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
-                                                                                                                        .then(function() {
-                                                                                                                            console.log('Saving sentenceWord!'.blue);
-                                                                                                                            fufill();
-                                                                                                                        })
-                                                                                                                        .catch(function(errSaveStringWord2) {
-                                                                                                                            console.log(errSaveStringWord2);
-                                                                                                                        });
-                                                                                                                    })
-                                                                                                                    .catch(function(correctAnswer4Err){
-                                                                                                                        console.log(correctAnswer4Err);
-                                                                                                                    });
-                                                                                                            })
-                                                                                                            .catch(function(isCorrect4Err){
-                                                                                                                console.log(isCorrect4Err);
-                                                                                                            })
-                                                                                                    })
-                                                                                                    .catch(function(randomNumber4Err){
-                                                                                                        console.log(randomNumber4Err);
-                                                                                                    });
-                                                                                            }
-                                                                                        })
-                                                                                        .catch(function(isCorrect3Err){
-                                                                                            console.log(isCorrect3Err);
-                                                                                        });
-                                                                                })
-                                                                                .catch(function(randomNumber3Err){
-                                                                                    console.log(randomNumber3Err);
-                                                                                });
-                                                                        }
-                                                                    })
-                                                                    .catch(function(isCorrect2Err){
-                                                                        console.log(isCorrect2Err);
-                                                                    })
-                                                            })
-                                                            .catch(function(randomNumber2Err){
-                                                                console.log(randomNumber2Err);
-                                                            });
+                                                                            } else {
+                                                                                guessRandomStringWord()
+                                                                                    .then(function(randomNumber2) {
+                                                                                        isCorrectMultipleChoice()
+                                                                                            .then(function(isCorrect2) {
+                                                                                                if (isCorrect2) {
+                                                                                                    extractCorrectSentenceWord(randomNumber2)
+                                                                                                        .then(function(correctAnswer2) {
+                                                                                                            stringWordCount++;
+                                                                                                            saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
+                                                                                                                .then(function() {
+                                                                                                                    console.log('Saving sentenceWord!'.blue);
+                                                                                                                    fufill();
+                                                                                                                })
+                                                                                                                .catch(function(errSaveStringWord2) {
+                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(err) {
+
+                                                                                                        });
+                                                                                                } else {
+                                                                                                    guessRandomStringWord()
+                                                                                                        .then(function(randomNumber3) {
+                                                                                                            isCorrectMultipleChoice()
+                                                                                                                .then(function(isCorrect3) {
+                                                                                                                    if (isCorrect3) {
+                                                                                                                        extractCorrectSentenceWord(randomNumber3)
+                                                                                                                            .then(function(correctAnswer3) {
+                                                                                                                                stringWordCount++;
+                                                                                                                                saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
+                                                                                                                                    .then(function() {
+                                                                                                                                        console.log('Saving sentenceWord!'.blue);
+                                                                                                                                        fufill();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                    });
+                                                                                                                            })
+                                                                                                                    } else {
+                                                                                                                        guessRandomStringWord()
+                                                                                                                            .then(function(randomNumber4) {
+                                                                                                                                isCorrectMultipleChoice()
+                                                                                                                                    .then(function(isCorrect4) {
+                                                                                                                                        extractCorrectSentenceWord(randomNumber4)
+                                                                                                                                            .then(function(correctAnswer4) {
+                                                                                                                                                stringWordCount++;
+                                                                                                                                                saveSentenceWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        console.log('Saving sentenceWord!'.blue);
+                                                                                                                                                        fufill();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                    });
+                                                                                                                                            })
+                                                                                                                                            .catch(function(correctAnswer4Err) {
+                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                            });
+                                                                                                                                    })
+                                                                                                                                    .catch(function(isCorrect4Err) {
+                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                    })
+                                                                                                                            })
+                                                                                                                            .catch(function(randomNumber4Err) {
+                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                            });
+                                                                                                                    }
+                                                                                                                })
+                                                                                                                .catch(function(isCorrect3Err) {
+                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(randomNumber3Err) {
+                                                                                                            console.log(randomNumber3Err);
+                                                                                                        });
+                                                                                                }
+                                                                                            })
+                                                                                            .catch(function(isCorrect2Err) {
+                                                                                                console.log(isCorrect2Err);
+                                                                                            })
+                                                                                    })
+                                                                                    .catch(function(randomNumber2Err) {
+                                                                                        console.log(randomNumber2Err);
+                                                                                    });
+                                                                            }
+                                                                        })
+                                                                        .catch(function(isCorrect1Err) {
+                                                                            console.log(isCorrect1Err);
+                                                                        })
+                                                                })
+                                                                .catch(function(randomNumber1Err) {
+                                                                    console.log(randomNumber1Err);
+                                                                });
                                                         }
                                                     })
-                                                    .catch(function(isCorrect1Err){
-                                                        console.log(isCorrect1Err);
-                                                    })
+                                                    .catch(function(findSWErr) {
+                                                        console.log(findSWerr);
+                                                    });
                                             })
-                                            .catch(function(randomNumber1Err){
-                                                console.log(randomNumber1Err);
+                                            .catch(function(erra4) {
+                                                console.log(erra4);
                                             });
-                                    }
-                                })
-                                .catch(function(findSWErr){
-                                    console.log(findSWerr);
-                                });
-                        })
-                        .catch(function(erra4){
-                            console.log(erra4);
-                        });
+                                    })
+                                    .catch(function(erra3) {
+                                        console.log(erra3);
+                                    });
+                            })
+                            .catch(function(erra2) {
+                                console.log(erra2);
+                            });
                     })
-                    .catch(function(erra3){
-                        console.log(erra3);
+                    .catch(function(errPrompt) {
+                        console.log(errPrompt);
                     });
-                })
-                .catch(function(erra2){
-                    console.log(erra2);
-                });
             })
-            .catch(function(errPrompt){
-                console.log(errPrompt);
+            .catch(function(erra1) {
+                console.log(erra1);
             });
-        })
-        .catch(function(erra1){
-            console.log(erra1);
-        });
     });
 }
 
@@ -591,39 +1032,117 @@ function answerSentenceWord() {
 
 
 
-function isMovable(callback){
-    console.log('Checking if is able to be moved!'.blue);
-    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[2]/button'))
-        .then(function(arrClass){
-            arrClass.getAttribute('class')
-            .then(function(arrowClass){
-                if(arrowClass.includes('active')){
-                    console.log('Checking for active class!'.blue);
-                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[2]/button')).click()
-                        .then(function(){
-                            console.log('Looping movement again!'.blue)
-                            isMovable(callback);
-                        })
-                        .catch(function(errClick){
-                            console.log(errClick + ''.red);
-                        });
-                } else {
-                    setTimeout(callback, 1000);
-                }
+function isMovable(callback) {
+    setTimeout(function() {
+        console.log('Checking if is able to be moved!'.blue);
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[2]/button'))
+            .then(function(arrClass) {
+                arrClass.getAttribute('class')
+                    .then(function(arrowClass) {
+                        if (arrowClass.includes('active')) {
+                            console.log('Checking for active class!'.blue);
+                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[2]/button')).click()
+                                .then(function() {
+                                    console.log('Looping movement again!'.blue)
+                                    setTimeout(function() {
+                                        isMovable(callback);
+                                    }, 2000);
+                                })
+                                .catch(function(errClick) {
+                                    console.log(errClick + ''.red);
+                                });
+                        } else {
+                            setTimeout(callback, 1000);
+                        }
+                    })
+                    .catch(function(moveErr) {
+                        console.log(moveErr + '.blue');
+                    })
             })
-            .catch(function(moveErr){
-                console.log(moveErr + '.blue');
-            })
-        })
-        .catch(function(error){
-            console.log('Not found! Must mean there is nothing left to click!'.blue);
-            callback();
-        });
+            .catch(function(error) {
+                console.log('Not found! Must mean there is nothing left to click!'.blue);
+                callback();
+            });
+    }, 250);
 }
 
 
 function getRandomIndex() {
     return Math.floor(count + (Math.random() * 3));
+}
+
+function extractCorrectParagraphWord(correctIndex) {
+    return new Promise(function(fufill, reject) {
+        setTimeout(function() {
+            console.log('Extracting correct answer!'.blue);
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
+            } else {
+                var countString = '';
+            }
+            var added = count + correctIndex - 1;
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + added + ']')).getText()
+                .then(function(text) {
+                    fufill(text);
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+        }, 250);
+    });
+}
+
+
+function extractCorrectImageWord(correctIndex) {
+    return new Promise(function(fufill, reject) {
+        setTimeout(function() {
+            console.log('Extracting correct answer!'.blue);
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
+            } else {
+                var countString = '';
+            }
+            var added = count + correctIndex - 1;
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[' + added + ']')).getText()
+                .then(function(text) {
+                    fufill(text);
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+        }, 250);
+    });
+}
+
+
+function guessRandomImageWord() {
+    return new Promise(function(fufill, reject) {
+        setTimeout(function() {
+            var randomNumber = Math.floor(Math.random() * tempChoices.length);
+            var randomChoice = tempChoices[randomNumber];
+            console.log('Stringwordcount is: ' + stringWordCount);
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
+            } else {
+                var countString = '';
+            }
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[' + randomChoice + ']'))
+                .then(function(resp) {
+                    driver.wait(until.elementIsVisible(resp), 5000).click()
+                        .then(function(clicked) {
+                            tempChoices.splice(randomNumber, 1);
+                            console.log(tempChoices);
+                            fufill(randomChoice);
+                        })
+                        .catch(function(errClick) {
+                            console.log(errClick);
+                        });
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+        }, 2000);
+    });
 }
 
 function guessRandomStringWord() {
@@ -632,20 +1151,20 @@ function guessRandomStringWord() {
             var randomNumber = Math.floor(Math.random() * tempChoices.length);
             var randomChoice = tempChoices[randomNumber];
             console.log('Stringwordcount is: ' + stringWordCount);
-            if(stringWordCount > 1){
-                var countString = '['+ stringWordCount + ']';
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
             } else {
                 var countString = '';
             }
             driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + randomChoice + ']'))
                 .then(function(resp) {
                     driver.wait(until.elementIsVisible(resp), 5000).click()
-                        .then(function(clicked){
+                        .then(function(clicked) {
                             tempChoices.splice(randomNumber, 1);
                             console.log(tempChoices);
                             fufill(randomChoice);
                         })
-                        .catch(function(errClick){
+                        .catch(function(errClick) {
                             console.log(errClick);
                         });
                 })
@@ -661,13 +1180,13 @@ function extractCorrectStringWord(correctIndex) {
     return new Promise(function(fufill, reject) {
         setTimeout(function() {
             console.log('Extracting correct answer!'.blue);
-            if(stringWordCount > 1){
-                var countString = '['+ stringWordCount+ ']';
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
             } else {
                 var countString = '';
             }
             var added = count + correctIndex - 1;
-            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString +'/div/div/section[1]/div[1]/div[4]/a[' + added + ']')).getText()
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + added + ']')).getText()
                 .then(function(text) {
                     fufill(text);
                 })
@@ -683,8 +1202,8 @@ function extractCorrectSentenceWord(correctIndex) {
     return new Promise(function(fufill, reject) {
         setTimeout(function() {
             console.log('Extracting correct answer!'.blue);
-            if(stringWordCount > 1){
-                var countString = '['+ stringWordCount+ ']';
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
             } else {
                 var countString = '';
             }
@@ -755,6 +1274,74 @@ function saveStringWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswe
                 'content-type': 'application/x-www-form-urlencoded'
             },
             uri: config.api.url + '/stringWord/create',
+            method: 'POST',
+            body: qs.stringify(postData)
+        }
+        request(options)
+            .then(function(resp) {
+                fufill();
+            })
+            .catch(function(error) {
+                console.log('ERROR');
+                reject(error);
+            });
+    });
+
+}
+
+function saveParagraphWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer) {
+    return new Promise(function(fufill, reject) {
+        var postData = {
+            token: apiToken,
+            prompt: prompt,
+            a1: a1,
+            a2: a2,
+            a3: a3,
+            a4: a4,
+            lessonURL: lessonURL,
+            addedBy: addedBy,
+            correctAnswer: correctAnswer
+        };
+        console.log('Saving imageWord to DB'.blue);
+        const options = {
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            uri: config.api.url + '/paragraphWord/create',
+            method: 'POST',
+            body: qs.stringify(postData)
+        }
+        request(options)
+            .then(function(resp) {
+                fufill();
+            })
+            .catch(function(error) {
+                console.log('ERROR');
+                reject(error);
+            });
+    });
+
+}
+
+function saveImageWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer) {
+    return new Promise(function(fufill, reject) {
+        var postData = {
+            token: apiToken,
+            prompt: prompt,
+            a1: a1,
+            a2: a2,
+            a3: a3,
+            a4: a4,
+            lessonURL: lessonURL,
+            addedBy: addedBy,
+            correctAnswer: correctAnswer
+        };
+        console.log('Saving imageWord to DB'.blue);
+        const options = {
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            uri: config.api.url + '/imageWord/create',
             method: 'POST',
             body: qs.stringify(postData)
         }
@@ -890,4 +1477,76 @@ function findStringWord(prompt, a1, a2, a3, a4) {
                 reject(error);
             });
     });
+}
+
+function findParagraphWord(prompt, a1, a2, a3, a4) {
+    return new Promise(function(fufill, reject) {
+        const options = {
+            method: 'GET',
+            uri: config.api.url + '/paragraphWord/find',
+            qs: {
+                token: apiToken,
+                prompt: prompt,
+                a1: a1,
+                a2: a2,
+                a3: a3,
+                a4: a4
+            }
+        }
+        request(options)
+            .then(function(resp) {
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
+    });
 };
+
+function findSentenceWord(prompt, a1, a2, a3, a4) {
+    return new Promise(function(fufill, reject) {
+        const options = {
+            method: 'GET',
+            uri: config.api.url + '/sentenceWord/find',
+            qs: {
+                token: apiToken,
+                prompt: prompt,
+                a1: a1,
+                a2: a2,
+                a3: a3,
+                a4: a4
+            }
+        }
+        request(options)
+            .then(function(resp) {
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
+    });
+};
+
+function findImageWord(prompt, a1, a2, a3, a4) {
+    return new Promise(function(fufill, reject) {
+        const options = {
+            method: 'GET',
+            uri: config.api.url + '/imageWord/find',
+            qs: {
+                token: apiToken,
+                prompt: prompt,
+                a1: a1,
+                a2: a2,
+                a3: a3,
+                a4: a4
+            }
+        }
+        request(options)
+            .then(function(resp) {
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
+    });
+}
