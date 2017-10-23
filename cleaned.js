@@ -167,6 +167,16 @@ function questionDriver() {
                                 .catch(function(errImage) {
                                     console.log(errImage);
                                 });
+                        } else if (divClass.includes('typeT')) {
+                            answerAudioWord()
+                                .then(function() {
+                                    setTimeout(function(){
+                                        assignmentDriver();
+                                    }, 1500);
+                                })
+                                .catch(function(errWord) {
+
+                                });
                         }
                     })
                     .catch(function(errClass) {
@@ -178,6 +188,134 @@ function questionDriver() {
             });
     });
 }
+
+
+
+
+function answerAudioWord() {
+    return new Promise(function(fufill, reject) {
+        if (stringWordCount > 1) {
+            var countString = '[' + stringWordCount + ']';
+        } else {
+            var countString = '';
+        }
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[1]/div[1]')).getText()
+            .then(function(prompt) {
+                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[2]/input'))
+                    .then(function(inputbox) {
+                        findAudioWord(prompt)
+                            .then(function(data) {
+                                if (data.answer) {
+                                    inputbox.sendKeys(data.answer)
+                                        .then(function() {
+                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
+                                                .then(function() {
+                                                    fufill();
+                                                })
+                                                .catch(function(errPress) {
+
+                                                });
+                                        })
+                                        .catch(function(errSendKeys) {
+
+                                        });
+                                } else {
+                                    inputbox.sendKeys('test')
+                                        .then(function() {
+                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
+                                                .then(function() {
+                                                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
+                                                        .then(function() {
+                                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
+                                                                .then(function() {
+                                                                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[2]'))
+                                                                        .then(function(resp){
+                                                                            driver.wait(until.elementIsVisible(resp), 5000).click()
+                                                                            .then(function(){
+                                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[2]')).click()
+                                                                                .then(function() {
+                                                                                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString)).getAttribute('data-word')
+                                                                                        .then(function(answer) {
+                                                                                            saveAudioWord(prompt, answer)
+                                                                                                .then(function() {
+                                                                                                    fufill();
+                                                                                                })
+                                                                                                .catch(function(errSave) {
+                                                                                                    console.log(errSave);
+                                                                                                });
+                                                                                        })
+                                                                                        .catch(function(errAnswer) {
+                                                                                            console.log(errAnswer);
+                                                                                        });
+                                                                                })
+                                                                                .catch(function(errPress) {
+                                                                                    console.log(errPress);
+                                                                                });
+                                                                            })
+                                                                            .catch(function(errPressedLast){
+
+                                                                            });
+  
+                                                                        })
+                                                                        .catch(function(errResp){
+
+                                                                        });
+ 
+                                                                })
+                                                                .catch(function(errPress3) {
+                                                                    console.log(errpress3);
+                                                                });
+                                                        })
+                                                        .catch(function(errPress2) {
+                                                            console.log(errpress2);
+                                                        });
+                                                })
+                                                .catch(function(errPress1) {
+                                                    console.log(errPress1);
+                                                });
+                                        })
+                                        .catch(function(errSendKeys) {
+                                            console.log(errSendKeys);
+                                        });
+                                }
+                            })
+                            .catch(function(errData) {
+                                console.log(errData);
+                            });
+                    })
+                    .catch(function(errInput) {
+                        console.log(errInput);
+                    });
+            })
+            .catch(function(errPrompt) {
+                console.log(errPrompt);
+            });
+    });
+}
+
+
+function findAudioWord(prompt) {
+    return new Promise(function(fufill, reject) {
+        const options = {
+            method: 'GET',
+            uri: config.api.url + '/audioWord/find',
+            qs: {
+                token: apiToken,
+                prompt: prompt
+            }
+        }
+        request(options)
+            .then(function(resp) {
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
+    });
+}
+
+
+
 
 function answerImageWord() {
     return new Promise(function(fufill, reject) {
@@ -1455,6 +1593,31 @@ function goToAssignment() {
 
 }
 
+
+function findSentenceWord(prompt, a1, a2, a3, a4) {
+    return new Promise(function(fufill, reject) {
+        const options = {
+            method: 'GET',
+            uri: config.api.url + '/sentenceWord/find',
+            qs: {
+                token: apiToken,
+                prompt: prompt,
+                a1: a1,
+                a2: a2,
+                a3: a3,
+                a4: a4
+            }
+        }
+        request(options)
+            .then(function(resp) {
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
+    });
+}
+
 function findStringWord(prompt, a1, a2, a3, a4) {
     return new Promise(function(fufill, reject) {
         const options = {
@@ -1503,29 +1666,6 @@ function findParagraphWord(prompt, a1, a2, a3, a4) {
     });
 };
 
-function findSentenceWord(prompt, a1, a2, a3, a4) {
-    return new Promise(function(fufill, reject) {
-        const options = {
-            method: 'GET',
-            uri: config.api.url + '/sentenceWord/find',
-            qs: {
-                token: apiToken,
-                prompt: prompt,
-                a1: a1,
-                a2: a2,
-                a3: a3,
-                a4: a4
-            }
-        }
-        request(options)
-            .then(function(resp) {
-                fufill(resp);
-            })
-            .catch(function(error) {
-                reject(error);
-            });
-    });
-};
 
 function findImageWord(prompt, a1, a2, a3, a4) {
     return new Promise(function(fufill, reject) {
@@ -1549,4 +1689,35 @@ function findImageWord(prompt, a1, a2, a3, a4) {
                 reject(error);
             });
     });
+}
+
+
+function saveAudioWord(prompt, correctAnswer) {
+    return new Promise(function(fufill, reject) {
+        var postData = {
+            token: apiToken,
+            prompt: prompt,
+            lessonURL: config.settings.lessonURL,
+            addedBy: config.login.username,
+            correctAnswer: correctAnswer
+        };
+        console.log('Saving imageWord to DB'.blue);
+        const options = {
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            uri: config.api.url + '/audioWord/create',
+            method: 'POST',
+            body: qs.stringify(postData)
+        }
+        request(options)
+            .then(function(resp) {
+                fufill();
+            })
+            .catch(function(error) {
+                console.log('ERROR');
+                reject(error);
+            });
+    });
+
 }
