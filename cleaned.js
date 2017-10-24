@@ -210,6 +210,7 @@ function answerAudioWord() {
                                         .then(function() {
                                             driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
                                                 .then(function() {
+                                                    stringWordCount++;
                                                     fufill();
                                                 })
                                                 .catch(function(errPress) {
@@ -238,6 +239,7 @@ function answerAudioWord() {
                                                                                         .then(function(answer) {
                                                                                             saveAudioWord(prompt, answer)
                                                                                                 .then(function() {
+                                                                                                    stringWordCount++;
                                                                                                     fufill();
                                                                                                 })
                                                                                                 .catch(function(errSave) {
