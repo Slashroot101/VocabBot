@@ -29,13 +29,7 @@ var driver = new webdriver.Builder()
     .withCapabilities(webdriver.Capabilities.chrome())
     .build();
 
-mongoose.connect(config.database)
-    .then(function(resp) {
-        console.log('Successfully connected to DB!');
-    })
-    .catch(function(err) {
-        console.log(err);
-    });
+
 
 
 
