@@ -29,14 +29,6 @@ var driver = new webdriver.Builder()
     .withCapabilities(webdriver.Capabilities.chrome())
     .build();
 
-mongoose.connect(config.database)
-    .then(function(resp) {
-        console.log('Successfully connected to DB!');
-    })
-    .catch(function(err) {
-        console.log(err);
-    });
-
 
 
 start();
@@ -86,7 +78,7 @@ function assignmentDriver() {
 
             })
             .catch(function(answerErr) {
-
+                console.log(answerErr)
             });
     });
 }
@@ -135,34 +127,44 @@ function questionDriver() {
                             console.log('Stringword'.yellow);
                             answerStringWord()
                                 .then(function() {
-                                    assignmentDriver();
+                                    setTimeout(function(){
+                                        assignmentDriver();
+                                    }, 1500);
                                 })
                                 .catch(function(errSW) {
-
+                                    console.log(errSW);
                                 });
                         } else if (divClass.includes('typeL') || divClass.includes('typeP') || divClass.includes('typeH')) {
                             console.log('SentenceWord'.yellow);
                             answerSentenceWord()
                                 .then(function() {
-                                    assignmentDriver();
+                                    setTimeout(function(){
+                                        assignmentDriver();
+                                    }, 1500);
                                 })
                                 .catch(function(errS) {
+                                    console.log(errS);
                                     assignmentDriver();
                                 })
                         } else if (divClass.includes('typeF')) {
                             console.log('ParagraphWord'.yellow);
                             answerParagraphWord()
                                 .then(function() {
-                                    assignmentDriver();
+                                    setTimeout(function(){
+                                        assignmentDriver();
+                                    }, 1500);
                                 })
                                 .catch(function(errPara) {
+                                    console.log(errPara);
                                     assignmentDriver();
                                 });
                         } else if (divClass.includes('typeI')) {
                             console.log('ImageWord'.yellow);
                             answerImageWord()
                                 .then(function() {
-                                    assignmentDriver();
+                                    setTimeout(function(){
+                                        assignmentDriver();
+                                    }, 1500);
                                 })
                                 .catch(function(errImage) {
                                     console.log(errImage);
@@ -175,7 +177,7 @@ function questionDriver() {
                                     }, 1500);
                                 })
                                 .catch(function(errWord) {
-
+                                    console.log(errWord);
                                 });
                         }
                     })
@@ -184,7 +186,7 @@ function questionDriver() {
                     });
             })
             .catch(function(errDiv) {
-
+                console.log(errDiv);
             });
     });
 }
@@ -205,8 +207,10 @@ function answerAudioWord() {
                     .then(function(inputbox) {
                         findAudioWord(prompt)
                             .then(function(data) {
-                                if (data.answer) {
-                                    inputbox.sendKeys(data.answer)
+                                var d = JSON.parse(data);
+                                console.log(d);
+                                if (d.answer != undefined) {
+                                    inputbox.sendKeys(d.answer)
                                         .then(function() {
                                             driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
                                                 .then(function() {
@@ -214,11 +218,11 @@ function answerAudioWord() {
                                                     fufill();
                                                 })
                                                 .catch(function(errPress) {
-
+                                                    console.log(errPress);
                                                 });
                                         })
                                         .catch(function(errSendKeys) {
-
+                                            console.log(errSendKeys);
                                         });
                                 } else {
                                     inputbox.sendKeys('test')
@@ -255,12 +259,12 @@ function answerAudioWord() {
                                                                                 });
                                                                             })
                                                                             .catch(function(errPressedLast){
-
+                                                                                console.log(errPressedLast);
                                                                             });
   
                                                                         })
                                                                         .catch(function(errResp){
-
+                                                                            console.log(errResp);
                                                                         });
  
                                                                 })
@@ -338,9 +342,10 @@ function answerImageWord() {
                                             .then(function(prompt) {
                                                 findImageWord(prompt, a1, a2, a3, a4)
                                                     .then(function(data) {
-                                                        console.log(data);
-                                                        if (data.answer) {
-                                                            if (data.answer === a1) {
+                                                        var d = JSON.parse(data);
+                                                        console.log(d);
+                                                        if (d.answer != undefined) {
+                                                            if (d.answer === a1) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[1]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 1!'.blue);
@@ -351,7 +356,7 @@ function answerImageWord() {
                                                                         console.log(clicka1);
                                                                         reject(clicka1);
                                                                     });
-                                                            } else if (data.answer === a2) {
+                                                            } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[2]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 2!'.blue);
@@ -362,7 +367,7 @@ function answerImageWord() {
                                                                         console.log(clicka2);
                                                                         reject(clicka2);
                                                                     });
-                                                            } else if (data.answer === a3) {
+                                                            } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[3]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 3!'.blue);
@@ -373,7 +378,7 @@ function answerImageWord() {
                                                                         console.log(clicka3);
                                                                         reject(clicka3);
                                                                     });
-                                                            } else if (data.answer === a4) {
+                                                            } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[4]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 4!'.blue);
@@ -550,9 +555,10 @@ function answerParagraphWord() {
                                             .then(function(prompt) {
                                                 findParagraphWord(prompt, a1, a2, a3, a4)
                                                     .then(function(data) {
-                                                        console.log(data);
-                                                        if (data.answer) {
-                                                            if (data.answer === a1) {
+                                                        var d = JSON.parse(data);
+                                                        console.log(d);
+                                                        if (d.answer != undefined) {
+                                                            if (d.answer === a1) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 1!'.blue);
@@ -563,7 +569,7 @@ function answerParagraphWord() {
                                                                         console.log(clicka1);
                                                                         reject(clicka1);
                                                                     });
-                                                            } else if (data.answer === a2) {
+                                                            } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 2!'.blue);
@@ -574,7 +580,7 @@ function answerParagraphWord() {
                                                                         console.log(clicka2);
                                                                         reject(clicka2);
                                                                     });
-                                                            } else if (data.answer === a3) {
+                                                            } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 3!'.blue);
@@ -585,7 +591,7 @@ function answerParagraphWord() {
                                                                         console.log(clicka3);
                                                                         reject(clicka3);
                                                                     });
-                                                            } else if (data.answer === a4) {
+                                                            } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 4!'.blue);
@@ -618,7 +624,7 @@ function answerParagraphWord() {
                                                                                             });
                                                                                     })
                                                                                     .catch(function(err) {
-
+                                                                                        console.log(err);
                                                                                     });
                                                                             } else {
                                                                                 guessRandomStringWord()
@@ -639,7 +645,7 @@ function answerParagraphWord() {
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(err) {
-
+                                                                                                            console.log(err);
                                                                                                         });
                                                                                                 } else {
                                                                                                     guessRandomStringWord()
@@ -762,11 +768,12 @@ function answerStringWord() {
                                                 //try to pull data from the prompt, if not found, guess and save the correct answer
                                                 findStringWord(prompt, a1, a2, a3, a4)
                                                     .then(function(data) {
-                                                        console.log(data);
-                                                        if (data.answer) {
+                                                        var d = JSON.parse(data);
+                                                        console.log(d);
+                                                        if (d.answer != undefined) {
                                                             //TODO: check if its correct
-                                                            if (data.answer === a1) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[1]')).click()
+                                                            if (d.answer === a1) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 1!'.blue);
                                                                         stringWordCount++;
@@ -776,8 +783,8 @@ function answerStringWord() {
                                                                         console.log(clicka1);
                                                                         reject(clicka1);
                                                                     });
-                                                            } else if (data.answer === a2) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[2]')).click()
+                                                            } else if (d.answer === a2) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 2!'.blue);
                                                                         stringWordCount++;
@@ -787,8 +794,8 @@ function answerStringWord() {
                                                                         console.log(clicka2);
                                                                         reject(clicka2);
                                                                     });
-                                                            } else if (data.answer === a3) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[3]')).click()
+                                                            } else if (d.answer === a3) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 3!'.blue);
                                                                         stringWordCount++;
@@ -798,8 +805,8 @@ function answerStringWord() {
                                                                         console.log(clicka3);
                                                                         reject(clicka3);
                                                                     });
-                                                            } else if (data.answer === a4) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[4]')).click()
+                                                            } else if (d.answer === a4) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 4!'.blue);
                                                                         stringWordCount++;
@@ -810,7 +817,7 @@ function answerStringWord() {
                                                                         reject(clicka4);
                                                                     });
                                                             }
-                                                        } else if (!data.answer) {
+                                                        } else {
                                                             guessRandomStringWord()
                                                                 .then(function(randomNumber1) {
                                                                     isCorrectMultipleChoice()
@@ -976,10 +983,11 @@ function answerSentenceWord() {
                                                 //try to pull data from the prompt, if not found, guess and save the correct answer
                                                 findSentenceWord(prompt, a1, a2, a3, a4)
                                                     .then(function(data) {
-                                                        console.log(data);
-                                                        if (data.answer) {
+                                                        var d = JSON.parse(data);
+                                                        console.log(d);
+                                                        if (d.answer != undefined) {
                                                             //TODO: check if its correct
-                                                            if (data.answer === a1) {
+                                                            if (d.answer === a1) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[1]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 1!'.blue);
@@ -990,7 +998,7 @@ function answerSentenceWord() {
                                                                         console.log(clicka1);
                                                                         reject(clicka1);
                                                                     });
-                                                            } else if (data.answer === a2) {
+                                                            } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[2]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 2!'.blue);
@@ -1001,7 +1009,7 @@ function answerSentenceWord() {
                                                                         console.log(clicka2);
                                                                         reject(clicka2);
                                                                     });
-                                                            } else if (data.answer === a3) {
+                                                            } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[3]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 3!'.blue);
@@ -1012,7 +1020,7 @@ function answerSentenceWord() {
                                                                         console.log(clicka3);
                                                                         reject(clicka3);
                                                                     });
-                                                            } else if (data.answer === a4) {
+                                                            } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[4]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 4!'.blue);
@@ -1024,7 +1032,7 @@ function answerSentenceWord() {
                                                                         reject(clicka4);
                                                                     });
                                                             }
-                                                        } else if (!data.answer) {
+                                                        } else {
                                                             guessRandomStringWord()
                                                                 .then(function(randomNumber1) {
                                                                     isCorrectMultipleChoice()
@@ -1612,6 +1620,7 @@ function findSentenceWord(prompt, a1, a2, a3, a4) {
         }
         request(options)
             .then(function(resp) {
+                console.log(resp);
                 fufill(resp);
             })
             .catch(function(error) {
@@ -1636,6 +1645,7 @@ function findStringWord(prompt, a1, a2, a3, a4) {
         }
         request(options)
             .then(function(resp) {
+                console.log(resp);
                 fufill(resp);
             })
             .catch(function(error) {
@@ -1660,6 +1670,7 @@ function findParagraphWord(prompt, a1, a2, a3, a4) {
         }
         request(options)
             .then(function(resp) {
+                console.log(resp);
                 fufill(resp);
             })
             .catch(function(error) {
@@ -1685,6 +1696,7 @@ function findImageWord(prompt, a1, a2, a3, a4) {
         }
         request(options)
             .then(function(resp) {
+                console.log(resp);
                 fufill(resp);
             })
             .catch(function(error) {
