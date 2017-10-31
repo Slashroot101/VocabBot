@@ -18,7 +18,9 @@ var qs = require('querystring');
 //the index for the first question in the set of four (images, multiple choice) NOT short answer questions
 var count = 1;
 var stringWordCount = 1;
+var queueObject;
 var apiToken;
+var numAchieve = 0;
 let choices = [1, 2, 3, 4];
 let tempChoices = choices;
 //initialization fun
@@ -29,12 +31,7 @@ var driver = new webdriver.Builder()
     .withCapabilities(webdriver.Capabilities.chrome())
     .build();
 
-
-
 start();
-
-
-//THESE FUNCTIONS CONTROL THE BOT'S ESSENTIAL LOOP
 
 function start() {
     login()
@@ -45,8 +42,15 @@ function start() {
                     console.log('Successfuly loaded page!');
                     getToken()
                         .then(function(data) {
-                            console.log('Start loop complete!'.blue);
-                            assignmentDriver();
+                            getCurrentTask()
+                                .then(function() {
+                                    console.log('Start loop complete!'.blue);
+                                    assignmentDriver();
+                                })
+                                .catch(function(err) {
+                                    console.log(err);
+                                });
+
                         })
                         .catch(function(error) {
                             console.log(error + ''.red);
@@ -60,6 +64,7 @@ function start() {
         .catch(function(err) {
             console.log(err);
         });
+
 }
 
 /*  Steps to driving the assignment:
@@ -67,23 +72,33 @@ function start() {
 */
 //this function does all of the driving (moving from question to question, etc)
 function assignmentDriver() {
-    if (stringWordCount === 11) {
-        stringWordCount = 1;
-    }
-    isMovable(function() {
-        console.log('Finished moving!'.blue);
-        tempChoices = [1, 2, 3, 4];
-        questionDriver()
-            .then(function() {
+    setTimeout(function() {
+        countNumberQuestions()
+            .then(function(number) {
+                console.log('Number is: ' + number);
+                console.log('StringWordCount is: ' + stringWordCount);
+                if (stringWordCount === number + 1 + numAchieve) {
+                    stringWordCount = 1;
+                    numAchieve = 0;
+                }
+                console.log(stringWordCount);
+                isMovable(function() {
+                    console.log('Finished moving!'.blue);
+                    tempChoices = [1, 2, 3, 4];
+                    questionDriver()
+                        .then(function() {
 
+                        })
+                        .catch(function(answerErr) {
+                            console.log(answerErr)
+                        });
+                });
             })
-            .catch(function(answerErr) {
-                console.log(answerErr)
+            .catch(function(errQuest) {
+                console.log(errQuest);
             });
-    });
+    }, 1000);
 }
-
-
 
 /*
 1. Find the type of question
@@ -127,7 +142,7 @@ function questionDriver() {
                             console.log('Stringword'.yellow);
                             answerStringWord()
                                 .then(function() {
-                                    setTimeout(function(){
+                                    setTimeout(function() {
                                         assignmentDriver();
                                     }, 1500);
                                 })
@@ -138,31 +153,29 @@ function questionDriver() {
                             console.log('SentenceWord'.yellow);
                             answerSentenceWord()
                                 .then(function() {
-                                    setTimeout(function(){
+                                    setTimeout(function() {
                                         assignmentDriver();
                                     }, 1500);
                                 })
                                 .catch(function(errS) {
                                     console.log(errS);
-                                    assignmentDriver();
                                 })
                         } else if (divClass.includes('typeF')) {
                             console.log('ParagraphWord'.yellow);
                             answerParagraphWord()
                                 .then(function() {
-                                    setTimeout(function(){
+                                    setTimeout(function() {
                                         assignmentDriver();
                                     }, 1500);
                                 })
                                 .catch(function(errPara) {
                                     console.log(errPara);
-                                    assignmentDriver();
                                 });
                         } else if (divClass.includes('typeI')) {
                             console.log('ImageWord'.yellow);
                             answerImageWord()
                                 .then(function() {
-                                    setTimeout(function(){
+                                    setTimeout(function() {
                                         assignmentDriver();
                                     }, 1500);
                                 })
@@ -172,13 +185,27 @@ function questionDriver() {
                         } else if (divClass.includes('typeT')) {
                             answerAudioWord()
                                 .then(function() {
-                                    setTimeout(function(){
+                                    setTimeout(function() {
                                         assignmentDriver();
                                     }, 1500);
                                 })
                                 .catch(function(errWord) {
                                     console.log(errWord);
                                 });
+                        } else if (divClass.includes('typeA')) {
+                            answerOppositeWord()
+                                .then(function() {
+                                    setTimeout(function() {
+                                        assignmentDriver();
+                                    }, 1500);
+                                })
+                                .catch(function(err) {
+                                    console.log(err);
+                                });
+                        } else {
+                            numAchieve++;
+                            stringWordCount++;
+                            assignmentDriver();
                         }
                     })
                     .catch(function(errClass) {
@@ -186,13 +213,10 @@ function questionDriver() {
                     });
             })
             .catch(function(errDiv) {
-                console.log(errDiv);
+
             });
     });
 }
-
-
-
 
 function answerAudioWord() {
     return new Promise(function(fufill, reject) {
@@ -234,39 +258,39 @@ function answerAudioWord() {
                                                             driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[1]')).click()
                                                                 .then(function() {
                                                                     driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[2]'))
-                                                                        .then(function(resp){
+                                                                        .then(function(resp) {
                                                                             driver.wait(until.elementIsVisible(resp), 5000).click()
-                                                                            .then(function(){
-                                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[2]')).click()
                                                                                 .then(function() {
-                                                                                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString)).getAttribute('data-word')
-                                                                                        .then(function(answer) {
-                                                                                            saveAudioWord(prompt, answer)
-                                                                                                .then(function() {
-                                                                                                    stringWordCount++;
-                                                                                                    fufill();
+                                                                                    driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/div[3]/button[2]')).click()
+                                                                                        .then(function() {
+                                                                                            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString)).getAttribute('data-word')
+                                                                                                .then(function(answer) {
+                                                                                                    saveAudioWord(prompt, answer)
+                                                                                                        .then(function() {
+                                                                                                            stringWordCount++;
+                                                                                                            fufill();
+                                                                                                        })
+                                                                                                        .catch(function(errSave) {
+                                                                                                            console.log(errSave);
+                                                                                                        });
                                                                                                 })
-                                                                                                .catch(function(errSave) {
-                                                                                                    console.log(errSave);
+                                                                                                .catch(function(errAnswer) {
+                                                                                                    console.log(errAnswer);
                                                                                                 });
                                                                                         })
-                                                                                        .catch(function(errAnswer) {
-                                                                                            console.log(errAnswer);
+                                                                                        .catch(function(errPress) {
+                                                                                            console.log(errPress);
                                                                                         });
                                                                                 })
-                                                                                .catch(function(errPress) {
-                                                                                    console.log(errPress);
+                                                                                .catch(function(errPressedLast) {
+                                                                                    console.log(errPressedLast);
                                                                                 });
-                                                                            })
-                                                                            .catch(function(errPressedLast){
-                                                                                console.log(errPressedLast);
-                                                                            });
-  
+
                                                                         })
-                                                                        .catch(function(errResp){
+                                                                        .catch(function(errResp) {
                                                                             console.log(errResp);
                                                                         });
- 
+
                                                                 })
                                                                 .catch(function(errPress3) {
                                                                     console.log(errpress3);
@@ -299,7 +323,6 @@ function answerAudioWord() {
     });
 }
 
-
 function findAudioWord(prompt) {
     return new Promise(function(fufill, reject) {
         const options = {
@@ -319,9 +342,6 @@ function findAudioWord(prompt) {
             });
     });
 }
-
-
-
 
 function answerImageWord() {
     return new Promise(function(fufill, reject) {
@@ -534,7 +554,6 @@ function answerImageWord() {
 
     });
 }
-
 
 function answerParagraphWord() {
     return new Promise(function(fufill, reject) {
@@ -781,7 +800,6 @@ function answerStringWord() {
                                                                     })
                                                                     .catch(function(clicka1) {
                                                                         console.log(clicka1);
-                                                                        reject(clicka1);
                                                                     });
                                                             } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
@@ -792,7 +810,6 @@ function answerStringWord() {
                                                                     })
                                                                     .catch(function(clicka2) {
                                                                         console.log(clicka2);
-                                                                        reject(clicka2);
                                                                     });
                                                             } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
@@ -803,7 +820,6 @@ function answerStringWord() {
                                                                     })
                                                                     .catch(function(clicka3) {
                                                                         console.log(clicka3);
-                                                                        reject(clicka3);
                                                                     });
                                                             } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
@@ -814,7 +830,6 @@ function answerStringWord() {
                                                                     })
                                                                     .catch(function(clicka4) {
                                                                         console.log(clicka4);
-                                                                        reject(clicka4);
                                                                     });
                                                             }
                                                         } else {
@@ -988,7 +1003,7 @@ function answerSentenceWord() {
                                                         if (d.answer != undefined) {
                                                             //TODO: check if its correct
                                                             if (d.answer === a1) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[1]')).click()
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 1!'.blue);
                                                                         stringWordCount++;
@@ -999,7 +1014,7 @@ function answerSentenceWord() {
                                                                         reject(clicka1);
                                                                     });
                                                             } else if (d.answer === a2) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[2]')).click()
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 2!'.blue);
                                                                         stringWordCount++;
@@ -1010,7 +1025,7 @@ function answerSentenceWord() {
                                                                         reject(clicka2);
                                                                     });
                                                             } else if (d.answer === a3) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[3]')).click()
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 3!'.blue);
                                                                         stringWordCount++;
@@ -1021,7 +1036,7 @@ function answerSentenceWord() {
                                                                         reject(clicka3);
                                                                     });
                                                             } else if (d.answer === a4) {
-                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div' + countString + '/div/div/div/section[1]/div[1]/div[4]/a[4]')).click()
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
                                                                     .then(function() {
                                                                         console.log('Clicked answer 4!'.blue);
                                                                         stringWordCount++;
@@ -1176,10 +1191,6 @@ function answerSentenceWord() {
     });
 }
 
-// THESE ARE THE BOTS UTILITY FUNCTIONS
-
-
-
 function isMovable(callback) {
     setTimeout(function() {
         console.log('Checking if is able to be moved!'.blue);
@@ -1214,6 +1225,218 @@ function isMovable(callback) {
     }, 250);
 }
 
+function answerOppositeWord() {
+    return new Promise(function(fufill, reject) {
+        if (stringWordCount > 1) {
+            var countString = '[' + stringWordCount + ']';
+        } else {
+            var countString = '';
+        }
+        
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[3]/strong')).getText()
+            .then(function(prompt) {
+                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).getText()
+                    .then(function(a1) {
+                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).getText()
+                            .then(function(a2) {
+                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).getText()
+                                    .then(function(a3) {
+                                        driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).getText()
+                                            .then(function(a4) {
+                                                findOppositeWord(prompt, a1, a2, a3, a4)
+                                                    .then(function(data) {
+                                                        var d = JSON.parse(data);
+                                                        console.log(d);
+                                                        if (d.answer != undefined) {
+                                                            if (d.answer === a1) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 1!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka1) {
+                                                                        console.log(clicka1);
+                                                                        reject(clicka1);
+                                                                    });
+
+                                                            } else if (d.answer === a2) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 2!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka2) {
+                                                                        console.log(clicka2);
+                                                                        reject(clicka2);
+                                                                    });
+                                                            } else if (d.answer === a3) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 3!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka3) {
+                                                                        console.log(clicka3);
+                                                                        reject(clicka3);
+                                                                    });
+                                                            } else if (d.answer === a4) {
+                                                                driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
+                                                                    .then(function() {
+                                                                        console.log('Clicked answer 4!'.blue);
+                                                                        stringWordCount++;
+                                                                        fufill();
+                                                                    })
+                                                                    .catch(function(clicka4) {
+                                                                        console.log(clicka4);
+                                                                        reject(clicka4);
+                                                                    });
+                                                            }
+                                                        } else {
+                                                            guessRandomOppositeWord()
+                                                                .then(function(randomNumber1) {
+                                                                    isCorrectMultipleChoice()
+                                                                        .then(function(isCorrect1) {
+                                                                            if (isCorrect1) {
+                                                                                extractCorrectOppositeWord(randomNumber1)
+                                                                                    .then(function(correctAnswer1) {
+                                                                                        stringWordCount++;
+                                                                                        saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer1)
+                                                                                            .then(function() {
+                                                                                                console.log('Saving sentenceWord!'.blue);
+                                                                                                fufill();
+                                                                                            })
+                                                                                            .catch(function(errSaveStringWord1) {
+                                                                                                console.log(errSaveStringWord1);
+                                                                                            });
+                                                                                    })
+                                                                                    .catch(function(err) {
+                                                                                        console.log(err);
+                                                                                    });
+                                                                            } else {
+                                                                                guessRandomOppositeWord()
+                                                                                    .then(function(randomNumber2) {
+                                                                                        isCorrectMultipleChoice()
+                                                                                            .then(function(isCorrect2) {
+                                                                                                if (isCorrect2) {
+                                                                                                    extractCorrectOppositeWord(randomNumber1)
+                                                                                                        .then(function(correctAnswer2) {
+                                                                                                            stringWordCount++;
+                                                                                                            saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
+                                                                                                                .then(function() {
+                                                                                                                    console.log('Saving sentenceWord!'.blue);
+                                                                                                                    fufill();
+                                                                                                                })
+                                                                                                                .catch(function(errSaveStringWord2) {
+                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(err) {
+                                                                                                            console.log(err);
+                                                                                                        });
+                                                                                                } else {
+                                                                                                    guessRandomOppositeWord()
+                                                                                                        .then(function(randomNumber3) {
+                                                                                                            isCorrectMultipleChoice()
+                                                                                                                .then(function(isCorrect3) {
+                                                                                                                    if (isCorrect3) {
+                                                                                                                        extractCorrectOppositeWord(randomNumber1)
+                                                                                                                            .then(function(correctAnswer3) {
+                                                                                                                                stringWordCount++;
+                                                                                                                                saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
+                                                                                                                                    .then(function() {
+                                                                                                                                        console.log('Saving sentenceWord!'.blue);
+                                                                                                                                        fufill();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                    });
+                                                                                                                            })
+                                                                                                                    } else {
+                                                                                                                        guessRandomOppositeWord()
+                                                                                                                            .then(function(randomNumber4) {
+                                                                                                                                isCorrectMultipleChoice()
+                                                                                                                                    .then(function(isCorrect4) {
+                                                                                                                                        extractCorrectOppositeWord(randomNumber1)
+                                                                                                                                            .then(function(correctAnswer4) {
+                                                                                                                                                stringWordCount++;
+                                                                                                                                                saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        console.log('Saving sentenceWord!'.blue);
+                                                                                                                                                        fufill();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(errSaveStringWord2) {
+                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                    });
+                                                                                                                                            })
+                                                                                                                                            .catch(function(correctAnswer4Err) {
+                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                            });
+                                                                                                                                    })
+                                                                                                                                    .catch(function(isCorrect4Err) {
+                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                    })
+                                                                                                                            })
+                                                                                                                            .catch(function(randomNumber4Err) {
+                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                            });
+                                                                                                                    }
+                                                                                                                })
+                                                                                                                .catch(function(isCorrect3Err) {
+                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                });
+                                                                                                        })
+                                                                                                        .catch(function(randomNumber3Err) {
+                                                                                                            console.log(randomNumber3Err);
+                                                                                                        });
+                                                                                                }
+                                                                                            })
+                                                                                            .catch(function(isCorrect2Err) {
+                                                                                                console.log(isCorrect2Err);
+                                                                                            })
+                                                                                    })
+                                                                                    .catch(function(randomNumber2Err) {
+                                                                                        console.log(randomNumber2Err);
+                                                                                    });
+                                                                            }
+                                                                        })
+                                                                        .catch(function(isCorrect1Err) {
+                                                                            console.log(isCorrect1Err);
+                                                                        })
+                                                                })
+                                                                .catch(function(randomNumber1Err) {
+                                                                    console.log(randomNumber1Err);
+                                                                });
+                                                        }
+                                                    })
+                                                    .catch(function(err5) {
+                                                        console.log(err5);
+                                                    });
+                                            })
+                                            .catch(function(err4) {
+                                                console.log(err4);
+                                            });
+                                    })
+                                    .catch(function(err3) {
+                                        console.log(err3);
+                                    });
+                            })
+                            .catch(function(err2) {
+                                console.log(err2);
+                            });
+                    })
+                    .catch(function(err1) {
+                        console.log(err1);
+                    });
+            })
+            .catch(function(err) {
+                console.log(err);
+            });
+    });
+}
+
 
 function getRandomIndex() {
     return Math.floor(count + (Math.random() * 3));
@@ -1241,6 +1464,31 @@ function extractCorrectParagraphWord(correctIndex) {
 }
 
 
+function findOppositeWord(prompt, a1, a2, a3, a4) {
+    return new Promise(function(fufill, reject) {
+        const options = {
+            method: 'GET',
+            uri: config.api.url + '/oppositeWord/find',
+            qs: {
+                token: apiToken,
+                prompt: prompt,
+                a1: a1,
+                a2: a2,
+                a3: a3,
+                a4: a4
+            }
+        }
+        request(options)
+            .then(function(resp) {
+                console.log(resp);
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
+    });
+}
+
 function extractCorrectImageWord(correctIndex) {
     return new Promise(function(fufill, reject) {
         setTimeout(function() {
@@ -1262,6 +1510,35 @@ function extractCorrectImageWord(correctIndex) {
     });
 }
 
+function guessRandomOppositeWord() {
+    return new Promise(function(fufill, reject) {
+        setTimeout(function() {
+            var randomNumber = Math.floor(Math.random() * tempChoices.length);
+            var randomChoice = tempChoices[randomNumber];
+            console.log('Stringwordcount is: ' + stringWordCount);
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
+            } else {
+                var countString = '';
+            }
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + randomChoice + ']'))
+                .then(function(resp) {
+                    driver.wait(until.elementIsVisible(resp), 5000).click()
+                        .then(function(clicked) {
+                            tempChoices.splice(randomNumber, 1);
+                            console.log(tempChoices);
+                            fufill(randomChoice);
+                        })
+                        .catch(function(errClick) {
+                            console.log(errClick);
+                        });
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+        }, 2000);
+    });
+}
 
 function guessRandomImageWord() {
     return new Promise(function(fufill, reject) {
@@ -1304,17 +1581,12 @@ function guessRandomStringWord() {
             } else {
                 var countString = '';
             }
-            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + randomChoice + ']'))
+
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + randomChoice + ']')).click()
                 .then(function(resp) {
-                    driver.wait(until.elementIsVisible(resp), 5000).click()
-                        .then(function(clicked) {
                             tempChoices.splice(randomNumber, 1);
                             console.log(tempChoices);
                             fufill(randomChoice);
-                        })
-                        .catch(function(errClick) {
-                            console.log(errClick);
-                        });
                 })
                 .catch(function(err) {
                     reject(err);
@@ -1322,7 +1594,6 @@ function guessRandomStringWord() {
         }, 2000);
     });
 }
-
 
 function extractCorrectStringWord(correctIndex) {
     return new Promise(function(fufill, reject) {
@@ -1345,6 +1616,26 @@ function extractCorrectStringWord(correctIndex) {
     });
 }
 
+function extractCorrectOppositeWord(correctIndex) {
+    return new Promise(function(fufill, reject) {
+        setTimeout(function() {
+            console.log('Extracting correct answer!'.blue);
+            if (stringWordCount > 1) {
+                var countString = '[' + stringWordCount + ']';
+            } else {
+                var countString = '';
+            }
+            var added = count + correctIndex - 1;
+            driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + added + ']')).getText()
+                .then(function(text) {
+                    fufill(text);
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+        }, 250);
+    });
+}
 
 function extractCorrectSentenceWord(correctIndex) {
     return new Promise(function(fufill, reject) {
@@ -1400,8 +1691,6 @@ function saveSentenceWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAns
     });
 
 }
-
-
 
 function saveStringWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer) {
     return new Promise(function(fufill, reject) {
@@ -1470,6 +1759,41 @@ function saveParagraphWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAn
     });
 
 }
+
+function saveOppositeWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer) {
+    return new Promise(function(fufill, reject) {
+        var postData = {
+            token: apiToken,
+            prompt: prompt,
+            a1: a1,
+            a2: a2,
+            a3: a3,
+            a4: a4,
+            lessonURL: lessonURL,
+            addedBy: addedBy,
+            correctAnswer: correctAnswer
+        };
+        console.log('Saving imageWord to DB'.blue);
+        const options = {
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            uri: config.api.url + '/oppositeWord/create',
+            method: 'POST',
+            body: qs.stringify(postData)
+        }
+        request(options)
+            .then(function(resp) {
+                fufill();
+            })
+            .catch(function(error) {
+                console.log('ERROR');
+                reject(error);
+            });
+    });
+
+}
+
 
 function saveImageWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer) {
     return new Promise(function(fufill, reject) {
@@ -1734,4 +2058,78 @@ function saveAudioWord(prompt, correctAnswer) {
             });
     });
 
+}
+
+function getCurrentTask() {
+    return new Promise(function(fufill, reject) {
+        var postData = {
+            token: apiToken
+        };
+        console.log('Saving imageWord to DB'.blue);
+        const options = {
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            uri: config.api.url + '/queue/currentTask',
+            method: 'GET',
+            body: qs.stringify(postData)
+        }
+        request(options)
+        .then(function(respo) {
+            var resp = JSON.parse(respo);
+            queueObject = resp;
+            console.log(JSON.parse(respo));
+            config.login.username = resp[0].config.apiLogin.username;
+            config.login.password = resp[0].config.apiLogin.password;
+            config.user.username = resp[0].config.user.username;
+            config.user.password = resp[0].config.user.password;
+            config.settings.lessonURL = resp[0].config.assignmentURL;
+            fufill(resp);
+        })
+        .catch(function(error) {
+            reject(error);
+        });
+    });
+}
+
+function countNumberQuestions() {
+    return new Promise(function(fufill, reject) {
+        driver.findElement(By.xpath('//*[@id="challenge"]/div/footer/div[2]/ul'))
+            .then(function(elements) {
+                elements.getAttribute("innerHTML")
+                    .then(function(inner) {
+                        console.log(inner);
+                        var numLi = ((occurrences(inner, "li", false)) / 2);
+                        var realNumLi = stringWordCount * -.5;
+                        fufill(.5 + numLi + realNumLi);
+                    })
+                    .catch(function(errInner) {
+                        console.log(errInner);
+                    });
+
+            })
+            .catch(function(errElements) {
+                console.log(errElements);
+            });
+    });
+}
+
+function occurrences(string, subString, allowOverlapping) {
+
+    string += "";
+    subString += "";
+    if (subString.length <= 0) return (string.length + 1);
+
+    var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+    while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+            ++n;
+            pos += step;
+        } else break;
+    }
+    return n;
 }
