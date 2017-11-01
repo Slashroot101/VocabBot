@@ -34,15 +34,18 @@ var driver = new webdriver.Builder()
 start();
 
 function start() {
-    login()
+    getCurrentTask()
+    .then(function(){
+        console.log(config);
+        login()
         .then(function() {
             console.log('Logged in!');
-            goToAssignment()
+            goToAssignment(false)
                 .then(function() {
                     console.log('Successfuly loaded page!');
                     getToken()
                         .then(function(data) {
-                            getCurrentTask()
+                            getToken()
                                 .then(function() {
                                     console.log('Start loop complete!'.blue);
                                     assignmentDriver();
@@ -50,21 +53,26 @@ function start() {
                                 .catch(function(err) {
                                     console.log(err);
                                 });
-
                         })
-                        .catch(function(error) {
-                            console.log(error + ''.red);
+                        .catch(function(err) {
+                            console.log(err);
                         });
 
                 })
-                .catch(function(err) {
-                    console.log(err);
+                .catch(function(error) {
+                    console.log(error + ''.red);
                 });
+
+
         })
         .catch(function(err) {
             console.log(err);
         });
 
+    })
+    .catch(function(err){
+        console.log(err);
+    });
 }
 
 /*  Steps to driving the assignment:
@@ -72,32 +80,64 @@ function start() {
 */
 //this function does all of the driving (moving from question to question, etc)
 function assignmentDriver() {
-    setTimeout(function() {
-        countNumberQuestions()
-            .then(function(number) {
-                console.log('Number is: ' + number);
-                console.log('StringWordCount is: ' + stringWordCount);
-                if (stringWordCount === number + 1 + numAchieve) {
-                    stringWordCount = 1;
-                    numAchieve = 0;
-                }
-                console.log(stringWordCount);
-                isMovable(function() {
-                    console.log('Finished moving!'.blue);
-                    tempChoices = [1, 2, 3, 4];
-                    questionDriver()
-                        .then(function() {
 
+    if (stringWordCount > 20) {
+        console.log('Stringword count stuck in loop!'.blue);
+        goToAssignment(true)
+            .then(function() {
+                stringWordCount = 1;
+                numAchieve = 0;
+                assignmentDriver();
+            })
+            .catch(function(err) {
+                console.log(err);
+            });
+    } else {
+        setTimeout(function() {
+            isComplete()
+                .then(function(exists) {
+                    if (exists) {
+                        driver.quit();
+                    } else {
+                        console.log(stringWordCount);
+                        isMovable(function() {
+                            console.log('Finished moving!'.blue);
+                            tempChoices = [1, 2, 3, 4];
+                            questionDriver()
+                                .then(function() {
+
+                                })
+                                .catch(function(answerErr) {
+                                    console.log(answerErr);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                        });
+                                });
+                        });
+
+                    }
+                })
+                .catch(function(err) {
+                    console.log(err);
+                    goToAssignment(true)
+                        .then(function() {
+                            stringWordCount = 1;
+                            numAchieve = 0;
+                            assignmentDriver();
                         })
-                        .catch(function(answerErr) {
-                            console.log(answerErr)
+                        .catch(function(err) {
+                            console.log(err);
                         });
                 });
-            })
-            .catch(function(errQuest) {
-                console.log(errQuest);
-            });
-    }, 1000);
+        }, 1000);
+    }
+
 }
 
 /*
@@ -148,6 +188,15 @@ function questionDriver() {
                                 })
                                 .catch(function(errSW) {
                                     console.log(errSW);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                        });
                                 });
                         } else if (divClass.includes('typeL') || divClass.includes('typeP') || divClass.includes('typeH')) {
                             console.log('SentenceWord'.yellow);
@@ -159,6 +208,15 @@ function questionDriver() {
                                 })
                                 .catch(function(errS) {
                                     console.log(errS);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                        });
                                 })
                         } else if (divClass.includes('typeF')) {
                             console.log('ParagraphWord'.yellow);
@@ -170,6 +228,15 @@ function questionDriver() {
                                 })
                                 .catch(function(errPara) {
                                     console.log(errPara);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                        });
                                 });
                         } else if (divClass.includes('typeI')) {
                             console.log('ImageWord'.yellow);
@@ -181,6 +248,15 @@ function questionDriver() {
                                 })
                                 .catch(function(errImage) {
                                     console.log(errImage);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                        });
                                 });
                         } else if (divClass.includes('typeT')) {
                             answerAudioWord()
@@ -191,6 +267,15 @@ function questionDriver() {
                                 })
                                 .catch(function(errWord) {
                                     console.log(errWord);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                        });
                                 });
                         } else if (divClass.includes('typeA')) {
                             answerOppositeWord()
@@ -201,19 +286,50 @@ function questionDriver() {
                                 })
                                 .catch(function(err) {
                                     console.log(err);
+                                    goToAssignment(true)
+                                        .then(function() {
+                                            stringWordCount = 1;
+                                            numAchieve = 0;
+                                            assignmentDriver();
+                                        })
+                                        .catch(function(err) {
+                                            console.log(err);
+                                            goToAssignment(true)
+                                                .then(function() {
+                                                    stringWordCount = 1;
+                                                    numAchieve = 0;
+                                                    assignmentDriver();
+                                                })
+                                                .catch(function(err) {
+                                                    console.log(err);
+                                                });
+                                        });
                                 });
-                        } else {
-                            numAchieve++;
-                            stringWordCount++;
-                            assignmentDriver();
                         }
                     })
                     .catch(function(errClass) {
                         console.log(errClass);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(errDiv) {
-
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             });
     });
 }
@@ -243,10 +359,46 @@ function answerAudioWord() {
                                                 })
                                                 .catch(function(errPress) {
                                                     console.log(errPress);
+                                                    goToAssignment(true)
+                                                        .then(function() {
+                                                            stringWordCount = 1;
+                                                            numAchieve = 0;
+                                                            assignmentDriver();
+                                                        })
+                                                        .catch(function(err) {
+                                                            console.log(err);
+                                                            goToAssignment(true)
+                                                                .then(function() {
+                                                                    stringWordCount = 1;
+                                                                    numAchieve = 0;
+                                                                    assignmentDriver();
+                                                                })
+                                                                .catch(function(err) {
+                                                                    console.log(err);
+                                                                });
+                                                        });
                                                 });
                                         })
                                         .catch(function(errSendKeys) {
                                             console.log(errSendKeys);
+                                            goToAssignment(true)
+                                                .then(function() {
+                                                    stringWordCount = 1;
+                                                    numAchieve = 0;
+                                                    assignmentDriver();
+                                                })
+                                                .catch(function(err) {
+                                                    console.log(err);
+                                                    goToAssignment(true)
+                                                        .then(function() {
+                                                            stringWordCount = 1;
+                                                            numAchieve = 0;
+                                                            assignmentDriver();
+                                                        })
+                                                        .catch(function(err) {
+                                                            console.log(err);
+                                                        });
+                                                });
                                         });
                                 } else {
                                     inputbox.sendKeys('test')
@@ -272,53 +424,161 @@ function answerAudioWord() {
                                                                                                         })
                                                                                                         .catch(function(errSave) {
                                                                                                             console.log(errSave);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 })
                                                                                                 .catch(function(errAnswer) {
                                                                                                     console.log(errAnswer);
+                                                                                                    goToAssignment(true)
+                                                                                                        .then(function() {
+                                                                                                            stringWordCount = 1;
+                                                                                                            numAchieve = 0;
+                                                                                                            assignmentDriver();
+                                                                                                        })
+                                                                                                        .catch(function(err) {
+                                                                                                            console.log(err);
+                                                                                                        });
                                                                                                 });
                                                                                         })
                                                                                         .catch(function(errPress) {
                                                                                             console.log(errPress);
+                                                                                            goToAssignment(true)
+                                                                                                .then(function() {
+                                                                                                    stringWordCount = 1;
+                                                                                                    numAchieve = 0;
+                                                                                                    assignmentDriver();
+                                                                                                })
+                                                                                                .catch(function(err) {
+                                                                                                    console.log(err);
+                                                                                                });
                                                                                         });
                                                                                 })
                                                                                 .catch(function(errPressedLast) {
                                                                                     console.log(errPressedLast);
+                                                                                    goToAssignment(true)
+                                                                                        .then(function() {
+                                                                                            stringWordCount = 1;
+                                                                                            numAchieve = 0;
+                                                                                            assignmentDriver();
+                                                                                        })
+                                                                                        .catch(function(err) {
+                                                                                            console.log(err);
+                                                                                        });
                                                                                 });
 
                                                                         })
                                                                         .catch(function(errResp) {
                                                                             console.log(errResp);
+                                                                            goToAssignment(true)
+                                                                                .then(function() {
+                                                                                    stringWordCount = 1;
+                                                                                    numAchieve = 0;
+                                                                                    assignmentDriver();
+                                                                                })
+                                                                                .catch(function(err) {
+                                                                                    console.log(err);
+                                                                                });
                                                                         });
 
                                                                 })
                                                                 .catch(function(errPress3) {
                                                                     console.log(errpress3);
+                                                                    goToAssignment(true)
+                                                                        .then(function() {
+                                                                            stringWordCount = 1;
+                                                                            numAchieve = 0;
+                                                                            assignmentDriver();
+                                                                        })
+                                                                        .catch(function(err) {
+                                                                            console.log(err);
+                                                                        });
                                                                 });
                                                         })
                                                         .catch(function(errPress2) {
                                                             console.log(errpress2);
+                                                            goToAssignment(true)
+                                                                .then(function() {
+                                                                    stringWordCount = 1;
+                                                                    numAchieve = 0;
+                                                                    assignmentDriver();
+                                                                })
+                                                                .catch(function(err) {
+                                                                    console.log(err);
+                                                                });
                                                         });
                                                 })
                                                 .catch(function(errPress1) {
                                                     console.log(errPress1);
+                                                    goToAssignment(true)
+                                                        .then(function() {
+                                                            stringWordCount = 1;
+                                                            numAchieve = 0;
+                                                            assignmentDriver();
+                                                        })
+                                                        .catch(function(err) {
+                                                            console.log(err);
+                                                        });
                                                 });
                                         })
                                         .catch(function(errSendKeys) {
                                             console.log(errSendKeys);
+                                            goToAssignment(true)
+                                                .then(function() {
+                                                    stringWordCount = 1;
+                                                    numAchieve = 0;
+                                                    assignmentDriver();
+                                                })
+                                                .catch(function(err) {
+                                                    console.log(err);
+                                                });
                                         });
                                 }
                             })
                             .catch(function(errData) {
                                 console.log(errData);
+                                goToAssignment(true)
+                                    .then(function() {
+                                        stringWordCount = 1;
+                                        numAchieve = 0;
+                                        assignmentDriver();
+                                    })
+                                    .catch(function(err) {
+                                        console.log(err);
+                                    });
                             });
                     })
                     .catch(function(errInput) {
                         console.log(errInput);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(errPrompt) {
                 console.log(errPrompt);
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             });
     });
 }
@@ -374,7 +634,15 @@ function answerImageWord() {
                                                                     })
                                                                     .catch(function(clicka1) {
                                                                         console.log(clicka1);
-                                                                        reject(clicka1);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[2]')).click()
@@ -385,7 +653,15 @@ function answerImageWord() {
                                                                     })
                                                                     .catch(function(clicka2) {
                                                                         console.log(clicka2);
-                                                                        reject(clicka2);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[3]')).click()
@@ -396,7 +672,15 @@ function answerImageWord() {
                                                                     })
                                                                     .catch(function(clicka3) {
                                                                         console.log(clicka3);
-                                                                        reject(clicka3);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[2]/a[4]')).click()
@@ -407,7 +691,15 @@ function answerImageWord() {
                                                                     })
                                                                     .catch(function(clicka4) {
                                                                         console.log(clicka4);
-                                                                        reject(clicka4);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             }
                                                         } else {
@@ -426,11 +718,27 @@ function answerImageWord() {
                                                                                                 fufill();
                                                                                             })
                                                                                             .catch(function(errSaveStringWord1) {
-                                                                                                console.log(errSaveStringWord1);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             });
                                                                                     })
                                                                                     .catch(function(err) {
-                                                                                        console.log(err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             } else {
                                                                                 guessRandomImageWord()
@@ -447,11 +755,27 @@ function answerImageWord() {
                                                                                                                     fufill();
                                                                                                                 })
                                                                                                                 .catch(function(errSaveStringWord2) {
-                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(err) {
-                                                                                                            console.log(err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 } else {
                                                                                                     guessRandomImageWord()
@@ -468,7 +792,15 @@ function answerImageWord() {
                                                                                                                                         fufill();
                                                                                                                                     })
                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     });
                                                                                                                             })
                                                                                                                     } else {
@@ -485,71 +817,199 @@ function answerImageWord() {
                                                                                                                                                         fufill();
                                                                                                                                                     })
                                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                        goToAssignment(true)
+                                                                                                                                                            .then(function() {
+                                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                                numAchieve = 0;
+                                                                                                                                                                assignmentDriver();
+                                                                                                                                                            })
+                                                                                                                                                            .catch(function(err) {
+                                                                                                                                                                console.log(err);
+                                                                                                                                                            });
                                                                                                                                                     });
                                                                                                                                             })
                                                                                                                                             .catch(function(correctAnswer4Err) {
-                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                                goToAssignment(true)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        stringWordCount = 1;
+                                                                                                                                                        numAchieve = 0;
+                                                                                                                                                        assignmentDriver();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(err) {
+                                                                                                                                                        console.log(err);
+                                                                                                                                                    });
                                                                                                                                             });
                                                                                                                                     })
                                                                                                                                     .catch(function(isCorrect4Err) {
-                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     })
                                                                                                                             })
                                                                                                                             .catch(function(randomNumber4Err) {
-                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                                goToAssignment(true)
+                                                                                                                                    .then(function() {
+                                                                                                                                        stringWordCount = 1;
+                                                                                                                                        numAchieve = 0;
+                                                                                                                                        assignmentDriver();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(err) {
+                                                                                                                                        console.log(err);
+                                                                                                                                    });
                                                                                                                             });
                                                                                                                     }
                                                                                                                 })
                                                                                                                 .catch(function(isCorrect3Err) {
-                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(randomNumber3Err) {
-                                                                                                            console.log(randomNumber3Err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 }
                                                                                             })
                                                                                             .catch(function(isCorrect2Err) {
-                                                                                                console.log(isCorrect2Err);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             })
                                                                                     })
                                                                                     .catch(function(randomNumber2Err) {
-                                                                                        console.log(randomNumber2Err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             }
                                                                         })
                                                                         .catch(function(isCorrect1Err) {
-                                                                            console.log(isCorrect1Err);
+                                                                            goToAssignment(true)
+                                                                                .then(function() {
+                                                                                    stringWordCount = 1;
+                                                                                    numAchieve = 0;
+                                                                                    assignmentDriver();
+                                                                                })
+                                                                                .catch(function(err) {
+                                                                                    console.log(err);
+                                                                                });
                                                                         })
                                                                 })
                                                                 .catch(function(randomNumber1Err) {
-                                                                    console.log(randomNumber1Err);
+                                                                    goToAssignment(true)
+                                                                        .then(function() {
+                                                                            stringWordCount = 1;
+                                                                            numAchieve = 0;
+                                                                            assignmentDriver();
+                                                                        })
+                                                                        .catch(function(err) {
+                                                                            console.log(err);
+                                                                        });
                                                                 });
                                                         }
                                                     })
                                                     .catch(function(errImageWord) {
-                                                        console.log(errImageWord);
+                                                        goToAssignment(true)
+                                                            .then(function() {
+                                                                stringWordCount = 1;
+                                                                numAchieve = 0;
+                                                                assignmentDriver();
+                                                            })
+                                                            .catch(function(err) {
+                                                                console.log(err);
+                                                            });
                                                     });
                                             })
                                             .catch(function(imageErr4) {
-                                                console.log(imageErr4);
+                                                goToAssignment(true)
+                                                    .then(function() {
+                                                        stringWordCount = 1;
+                                                        numAchieve = 0;
+                                                        assignmentDriver();
+                                                    })
+                                                    .catch(function(err) {
+                                                        console.log(err);
+                                                    });
                                             });
                                     })
                                     .catch(function(imageErr3) {
-                                        console.log(imageErr3);
+                                        goToAssignment(true)
+                                            .then(function() {
+                                                stringWordCount = 1;
+                                                numAchieve = 0;
+                                                assignmentDriver();
+                                            })
+                                            .catch(function(err) {
+                                                console.log(err);
+                                            });
                                     });
                             })
                             .catch(function(imageErr2) {
-                                console.log(imageErr2);
+                                goToAssignment(true)
+                                    .then(function() {
+                                        stringWordCount = 1;
+                                        numAchieve = 0;
+                                        assignmentDriver();
+                                    })
+                                    .catch(function(err) {
+                                        console.log(err);
+                                    });
                             });
                     })
                     .catch(function(imageErr1) {
-                        console.log(imageErr1);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(errPrompt) {
-                console.log(errPrompt);
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             })
 
     });
@@ -586,7 +1046,15 @@ function answerParagraphWord() {
                                                                     })
                                                                     .catch(function(clicka1) {
                                                                         console.log(clicka1);
-                                                                        reject(clicka1);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
@@ -597,7 +1065,15 @@ function answerParagraphWord() {
                                                                     })
                                                                     .catch(function(clicka2) {
                                                                         console.log(clicka2);
-                                                                        reject(clicka2);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
@@ -608,7 +1084,15 @@ function answerParagraphWord() {
                                                                     })
                                                                     .catch(function(clicka3) {
                                                                         console.log(clicka3);
-                                                                        reject(clicka3);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
@@ -619,7 +1103,15 @@ function answerParagraphWord() {
                                                                     })
                                                                     .catch(function(clicka4) {
                                                                         console.log(clicka4);
-                                                                        reject(clicka4);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             }
                                                         } else {
@@ -639,11 +1131,27 @@ function answerParagraphWord() {
                                                                                                 fufill();
                                                                                             })
                                                                                             .catch(function(errSaveStringWord1) {
-                                                                                                console.log(errSaveStringWord1);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             });
                                                                                     })
                                                                                     .catch(function(err) {
-                                                                                        console.log(err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             } else {
                                                                                 guessRandomStringWord()
@@ -660,11 +1168,27 @@ function answerParagraphWord() {
                                                                                                                     fufill();
                                                                                                                 })
                                                                                                                 .catch(function(errSaveStringWord2) {
-                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(err) {
-                                                                                                            console.log(err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 } else {
                                                                                                     guessRandomStringWord()
@@ -681,7 +1205,15 @@ function answerParagraphWord() {
                                                                                                                                         fufill();
                                                                                                                                     })
                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     });
                                                                                                                             })
                                                                                                                     } else {
@@ -698,71 +1230,199 @@ function answerParagraphWord() {
                                                                                                                                                         fufill();
                                                                                                                                                     })
                                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                        goToAssignment(true)
+                                                                                                                                                            .then(function() {
+                                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                                numAchieve = 0;
+                                                                                                                                                                assignmentDriver();
+                                                                                                                                                            })
+                                                                                                                                                            .catch(function(err) {
+                                                                                                                                                                console.log(err);
+                                                                                                                                                            });
                                                                                                                                                     });
                                                                                                                                             })
                                                                                                                                             .catch(function(correctAnswer4Err) {
-                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                                goToAssignment(true)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        stringWordCount = 1;
+                                                                                                                                                        numAchieve = 0;
+                                                                                                                                                        assignmentDriver();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(err) {
+                                                                                                                                                        console.log(err);
+                                                                                                                                                    });
                                                                                                                                             });
                                                                                                                                     })
                                                                                                                                     .catch(function(isCorrect4Err) {
-                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     })
                                                                                                                             })
                                                                                                                             .catch(function(randomNumber4Err) {
-                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                                goToAssignment(true)
+                                                                                                                                    .then(function() {
+                                                                                                                                        stringWordCount = 1;
+                                                                                                                                        numAchieve = 0;
+                                                                                                                                        assignmentDriver();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(err) {
+                                                                                                                                        console.log(err);
+                                                                                                                                    });
                                                                                                                             });
                                                                                                                     }
                                                                                                                 })
                                                                                                                 .catch(function(isCorrect3Err) {
-                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(randomNumber3Err) {
-                                                                                                            console.log(randomNumber3Err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 }
                                                                                             })
                                                                                             .catch(function(isCorrect2Err) {
-                                                                                                console.log(isCorrect2Err);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             })
                                                                                     })
                                                                                     .catch(function(randomNumber2Err) {
-                                                                                        console.log(randomNumber2Err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             }
                                                                         })
                                                                         .catch(function(isCorrect1Err) {
-                                                                            console.log(isCorrect1Err);
+                                                                            goToAssignment(true)
+                                                                                .then(function() {
+                                                                                    stringWordCount = 1;
+                                                                                    numAchieve = 0;
+                                                                                    assignmentDriver();
+                                                                                })
+                                                                                .catch(function(err) {
+                                                                                    console.log(err);
+                                                                                });
                                                                         })
                                                                 })
                                                                 .catch(function(randomNumber1Err) {
-                                                                    console.log(randomNumber1Err);
+                                                                    goToAssignment(true)
+                                                                        .then(function() {
+                                                                            stringWordCount = 1;
+                                                                            numAchieve = 0;
+                                                                            assignmentDriver();
+                                                                        })
+                                                                        .catch(function(err) {
+                                                                            console.log(err);
+                                                                        });
                                                                 });
                                                         }
                                                     })
                                                     .catch(function(errData) {
-                                                        console.log(errData);
+                                                        goToAssignment(true)
+                                                            .then(function() {
+                                                                stringWordCount = 1;
+                                                                numAchieve = 0;
+                                                                assignmentDriver();
+                                                            })
+                                                            .catch(function(err) {
+                                                                console.log(err);
+                                                            });
                                                     });
                                             })
                                             .catch(function(errPrompt) {
-                                                console.log(errPrompt);
+                                                goToAssignment(true)
+                                                    .then(function() {
+                                                        stringWordCount = 1;
+                                                        numAchieve = 0;
+                                                        assignmentDriver();
+                                                    })
+                                                    .catch(function(err) {
+                                                        console.log(err);
+                                                    });
                                             });
                                     })
                                     .catch(function(errA4) {
-                                        console.log(errA4);
+                                        goToAssignment(true)
+                                            .then(function() {
+                                                stringWordCount = 1;
+                                                numAchieve = 0;
+                                                assignmentDriver();
+                                            })
+                                            .catch(function(err) {
+                                                console.log(err);
+                                            });
                                     });
                             })
                             .catch(function(errA3) {
-                                console.log(errA3);
+                                goToAssignment(true)
+                                    .then(function() {
+                                        stringWordCount = 1;
+                                        numAchieve = 0;
+                                        assignmentDriver();
+                                    })
+                                    .catch(function(err) {
+                                        console.log(err);
+                                    });
                             });
                     })
                     .catch(function(errA2) {
-                        console.log(errA2);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(errA1) {
-                console.log(errA1);
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             });
     });
 }
@@ -799,7 +1459,15 @@ function answerStringWord() {
                                                                         fufill();
                                                                     })
                                                                     .catch(function(clicka1) {
-                                                                        console.log(clicka1);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
@@ -809,7 +1477,15 @@ function answerStringWord() {
                                                                         fufill();
                                                                     })
                                                                     .catch(function(clicka2) {
-                                                                        console.log(clicka2);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
@@ -819,7 +1495,15 @@ function answerStringWord() {
                                                                         fufill();
                                                                     })
                                                                     .catch(function(clicka3) {
-                                                                        console.log(clicka3);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
@@ -829,7 +1513,15 @@ function answerStringWord() {
                                                                         fufill();
                                                                     })
                                                                     .catch(function(clicka4) {
-                                                                        console.log(clicka4);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             }
                                                         } else {
@@ -848,11 +1540,27 @@ function answerStringWord() {
                                                                                                 fufill();
                                                                                             })
                                                                                             .catch(function(errSaveStringWord1) {
-                                                                                                console.log(errSaveStringWord1);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             });
                                                                                     })
                                                                                     .catch(function(err) {
-
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             } else {
                                                                                 guessRandomStringWord()
@@ -869,11 +1577,27 @@ function answerStringWord() {
                                                                                                                     fufill();
                                                                                                                 })
                                                                                                                 .catch(function(errSaveStringWord2) {
-                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(err) {
-
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 } else {
                                                                                                     guessRandomStringWord()
@@ -890,7 +1614,15 @@ function answerStringWord() {
                                                                                                                                         fufill();
                                                                                                                                     })
                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     });
                                                                                                                             })
                                                                                                                     } else {
@@ -908,71 +1640,199 @@ function answerStringWord() {
                                                                                                                                                         fufill();
                                                                                                                                                     })
                                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                        goToAssignment(true)
+                                                                                                                                                            .then(function() {
+                                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                                numAchieve = 0;
+                                                                                                                                                                assignmentDriver();
+                                                                                                                                                            })
+                                                                                                                                                            .catch(function(err) {
+                                                                                                                                                                console.log(err);
+                                                                                                                                                            });
                                                                                                                                                     });
                                                                                                                                             })
                                                                                                                                             .catch(function(correctAnswer4Err) {
-                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                                goToAssignment(true)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        stringWordCount = 1;
+                                                                                                                                                        numAchieve = 0;
+                                                                                                                                                        assignmentDriver();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(err) {
+                                                                                                                                                        console.log(err);
+                                                                                                                                                    });
                                                                                                                                             });
                                                                                                                                     })
                                                                                                                                     .catch(function(isCorrect4Err) {
-                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     })
                                                                                                                             })
                                                                                                                             .catch(function(randomNumber4Err) {
-                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                                goToAssignment(true)
+                                                                                                                                    .then(function() {
+                                                                                                                                        stringWordCount = 1;
+                                                                                                                                        numAchieve = 0;
+                                                                                                                                        assignmentDriver();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(err) {
+                                                                                                                                        console.log(err);
+                                                                                                                                    });
                                                                                                                             });
                                                                                                                     }
                                                                                                                 })
                                                                                                                 .catch(function(isCorrect3Err) {
-                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(randomNumber3Err) {
-                                                                                                            console.log(randomNumber3Err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 }
                                                                                             })
                                                                                             .catch(function(isCorrect2Err) {
-                                                                                                console.log(isCorrect2Err);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             })
                                                                                     })
                                                                                     .catch(function(randomNumber2Err) {
-                                                                                        console.log(randomNumber2Err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             }
                                                                         })
                                                                         .catch(function(isCorrect1Err) {
-                                                                            console.log(isCorrect1Err);
+                                                                            goToAssignment(true)
+                                                                                .then(function() {
+                                                                                    stringWordCount = 1;
+                                                                                    numAchieve = 0;
+                                                                                    assignmentDriver();
+                                                                                })
+                                                                                .catch(function(err) {
+                                                                                    console.log(err);
+                                                                                });
                                                                         })
                                                                 })
                                                                 .catch(function(randomNumber1Err) {
-                                                                    console.log(randomNumber1Err);
+                                                                    goToAssignment(true)
+                                                                        .then(function() {
+                                                                            stringWordCount = 1;
+                                                                            numAchieve = 0;
+                                                                            assignmentDriver();
+                                                                        })
+                                                                        .catch(function(err) {
+                                                                            console.log(err);
+                                                                        });
                                                                 });
                                                         }
                                                     })
                                                     .catch(function(findSWErr) {
-                                                        console.log(findSWerr);
+                                                        goToAssignment(true)
+                                                            .then(function() {
+                                                                stringWordCount = 1;
+                                                                numAchieve = 0;
+                                                                assignmentDriver();
+                                                            })
+                                                            .catch(function(err) {
+                                                                console.log(err);
+                                                            });
                                                     });
                                             })
                                             .catch(function(erra4) {
-                                                console.log(erra4);
+                                                goToAssignment(true)
+                                                    .then(function() {
+                                                        stringWordCount = 1;
+                                                        numAchieve = 0;
+                                                        assignmentDriver();
+                                                    })
+                                                    .catch(function(err) {
+                                                        console.log(err);
+                                                    });
                                             });
                                     })
                                     .catch(function(erra3) {
-                                        console.log(erra3);
+                                        goToAssignment(true)
+                                            .then(function() {
+                                                stringWordCount = 1;
+                                                numAchieve = 0;
+                                                assignmentDriver();
+                                            })
+                                            .catch(function(err) {
+                                                console.log(err);
+                                            });
                                     });
                             })
                             .catch(function(erra2) {
-                                console.log(erra2);
+                                goToAssignment(true)
+                                    .then(function() {
+                                        stringWordCount = 1;
+                                        numAchieve = 0;
+                                        assignmentDriver();
+                                    })
+                                    .catch(function(err) {
+                                        console.log(err);
+                                    });
                             });
                     })
                     .catch(function(errPrompt) {
-                        console.log(errPrompt);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(erra1) {
-                console.log(erra1);
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             });
     });
 }
@@ -1011,7 +1871,15 @@ function answerSentenceWord() {
                                                                     })
                                                                     .catch(function(clicka1) {
                                                                         console.log(clicka1);
-                                                                        reject(clicka1);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a2) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[2]')).click()
@@ -1022,7 +1890,15 @@ function answerSentenceWord() {
                                                                     })
                                                                     .catch(function(clicka2) {
                                                                         console.log(clicka2);
-                                                                        reject(clicka2);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
@@ -1033,7 +1909,15 @@ function answerSentenceWord() {
                                                                     })
                                                                     .catch(function(clicka3) {
                                                                         console.log(clicka3);
-                                                                        reject(clicka3);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
@@ -1044,7 +1928,15 @@ function answerSentenceWord() {
                                                                     })
                                                                     .catch(function(clicka4) {
                                                                         console.log(clicka4);
-                                                                        reject(clicka4);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             }
                                                         } else {
@@ -1064,10 +1956,27 @@ function answerSentenceWord() {
                                                                                             })
                                                                                             .catch(function(errSaveStringWord1) {
                                                                                                 console.log(errSaveStringWord1);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             });
                                                                                     })
                                                                                     .catch(function(err) {
-
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             } else {
                                                                                 guessRandomStringWord()
@@ -1084,11 +1993,27 @@ function answerSentenceWord() {
                                                                                                                     fufill();
                                                                                                                 })
                                                                                                                 .catch(function(errSaveStringWord2) {
-                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(err) {
-
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 } else {
                                                                                                     guessRandomStringWord()
@@ -1105,7 +2030,15 @@ function answerSentenceWord() {
                                                                                                                                         fufill();
                                                                                                                                     })
                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     });
                                                                                                                             })
                                                                                                                     } else {
@@ -1122,71 +2055,199 @@ function answerSentenceWord() {
                                                                                                                                                         fufill();
                                                                                                                                                     })
                                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                        goToAssignment(true)
+                                                                                                                                                            .then(function() {
+                                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                                numAchieve = 0;
+                                                                                                                                                                assignmentDriver();
+                                                                                                                                                            })
+                                                                                                                                                            .catch(function(err) {
+                                                                                                                                                                console.log(err);
+                                                                                                                                                            });
                                                                                                                                                     });
                                                                                                                                             })
                                                                                                                                             .catch(function(correctAnswer4Err) {
-                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                                goToAssignment(true)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        stringWordCount = 1;
+                                                                                                                                                        numAchieve = 0;
+                                                                                                                                                        assignmentDriver();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(err) {
+                                                                                                                                                        console.log(err);
+                                                                                                                                                    });
                                                                                                                                             });
                                                                                                                                     })
                                                                                                                                     .catch(function(isCorrect4Err) {
-                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     })
                                                                                                                             })
                                                                                                                             .catch(function(randomNumber4Err) {
-                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                                goToAssignment(true)
+                                                                                                                                    .then(function() {
+                                                                                                                                        stringWordCount = 1;
+                                                                                                                                        numAchieve = 0;
+                                                                                                                                        assignmentDriver();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(err) {
+                                                                                                                                        console.log(err);
+                                                                                                                                    });
                                                                                                                             });
                                                                                                                     }
                                                                                                                 })
                                                                                                                 .catch(function(isCorrect3Err) {
-                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(randomNumber3Err) {
-                                                                                                            console.log(randomNumber3Err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 }
                                                                                             })
                                                                                             .catch(function(isCorrect2Err) {
-                                                                                                console.log(isCorrect2Err);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             })
                                                                                     })
                                                                                     .catch(function(randomNumber2Err) {
-                                                                                        console.log(randomNumber2Err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });;
                                                                                     });
                                                                             }
                                                                         })
                                                                         .catch(function(isCorrect1Err) {
-                                                                            console.log(isCorrect1Err);
+                                                                            goToAssignment(true)
+                                                                                .then(function() {
+                                                                                    stringWordCount = 1;
+                                                                                    numAchieve = 0;
+                                                                                    assignmentDriver();
+                                                                                })
+                                                                                .catch(function(err) {
+                                                                                    console.log(err);
+                                                                                });
                                                                         })
                                                                 })
                                                                 .catch(function(randomNumber1Err) {
-                                                                    console.log(randomNumber1Err);
+                                                                    goToAssignment(true)
+                                                                        .then(function() {
+                                                                            stringWordCount = 1;
+                                                                            numAchieve = 0;
+                                                                            assignmentDriver();
+                                                                        })
+                                                                        .catch(function(err) {
+                                                                            console.log(err);
+                                                                        });
                                                                 });
                                                         }
                                                     })
                                                     .catch(function(findSWErr) {
-                                                        console.log(findSWerr);
+                                                        goToAssignment(true)
+                                                            .then(function() {
+                                                                stringWordCount = 1;
+                                                                numAchieve = 0;
+                                                                assignmentDriver();
+                                                            })
+                                                            .catch(function(err) {
+                                                                console.log(err);
+                                                            });
                                                     });
                                             })
                                             .catch(function(erra4) {
-                                                console.log(erra4);
+                                                goToAssignment(true)
+                                                    .then(function() {
+                                                        stringWordCount = 1;
+                                                        numAchieve = 0;
+                                                        assignmentDriver();
+                                                    })
+                                                    .catch(function(err) {
+                                                        console.log(err);
+                                                    });
                                             });
                                     })
                                     .catch(function(erra3) {
-                                        console.log(erra3);
+                                        goToAssignment(true)
+                                            .then(function() {
+                                                stringWordCount = 1;
+                                                numAchieve = 0;
+                                                assignmentDriver();
+                                            })
+                                            .catch(function(err) {
+                                                console.log(err);
+                                            });
                                     });
                             })
                             .catch(function(erra2) {
-                                console.log(erra2);
+                                goToAssignment(true)
+                                    .then(function() {
+                                        stringWordCount = 1;
+                                        numAchieve = 0;
+                                        assignmentDriver();
+                                    })
+                                    .catch(function(err) {
+                                        console.log(err);
+                                    });
                             });
                     })
                     .catch(function(errPrompt) {
-                        console.log(errPrompt);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(erra1) {
-                console.log(erra1);
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             });
     });
 }
@@ -1232,7 +2293,7 @@ function answerOppositeWord() {
         } else {
             var countString = '';
         }
-        
+
         driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[3]/strong')).getText()
             .then(function(prompt) {
                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[1]')).getText()
@@ -1257,7 +2318,15 @@ function answerOppositeWord() {
                                                                     })
                                                                     .catch(function(clicka1) {
                                                                         console.log(clicka1);
-                                                                        reject(clicka1);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
 
                                                             } else if (d.answer === a2) {
@@ -1269,7 +2338,15 @@ function answerOppositeWord() {
                                                                     })
                                                                     .catch(function(clicka2) {
                                                                         console.log(clicka2);
-                                                                        reject(clicka2);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a3) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[3]')).click()
@@ -1280,7 +2357,15 @@ function answerOppositeWord() {
                                                                     })
                                                                     .catch(function(clicka3) {
                                                                         console.log(clicka3);
-                                                                        reject(clicka3);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             } else if (d.answer === a4) {
                                                                 driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[4]')).click()
@@ -1291,7 +2376,15 @@ function answerOppositeWord() {
                                                                     })
                                                                     .catch(function(clicka4) {
                                                                         console.log(clicka4);
-                                                                        reject(clicka4);
+                                                                        goToAssignment(true)
+                                                                            .then(function() {
+                                                                                stringWordCount = 1;
+                                                                                numAchieve = 0;
+                                                                                assignmentDriver();
+                                                                            })
+                                                                            .catch(function(err) {
+                                                                                console.log(err);
+                                                                            });
                                                                     });
                                                             }
                                                         } else {
@@ -1309,11 +2402,27 @@ function answerOppositeWord() {
                                                                                                 fufill();
                                                                                             })
                                                                                             .catch(function(errSaveStringWord1) {
-                                                                                                console.log(errSaveStringWord1);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             });
                                                                                     })
                                                                                     .catch(function(err) {
-                                                                                        console.log(err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             } else {
                                                                                 guessRandomOppositeWord()
@@ -1330,11 +2439,27 @@ function answerOppositeWord() {
                                                                                                                     fufill();
                                                                                                                 })
                                                                                                                 .catch(function(errSaveStringWord2) {
-                                                                                                                    console.log(errSaveStringWord2);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(err) {
-                                                                                                            console.log(err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 } else {
                                                                                                     guessRandomOppositeWord()
@@ -1351,7 +2476,15 @@ function answerOppositeWord() {
                                                                                                                                         fufill();
                                                                                                                                     })
                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     });
                                                                                                                             })
                                                                                                                     } else {
@@ -1368,71 +2501,199 @@ function answerOppositeWord() {
                                                                                                                                                         fufill();
                                                                                                                                                     })
                                                                                                                                                     .catch(function(errSaveStringWord2) {
-                                                                                                                                                        console.log(errSaveStringWord2);
+                                                                                                                                                        goToAssignment(true)
+                                                                                                                                                            .then(function() {
+                                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                                numAchieve = 0;
+                                                                                                                                                                assignmentDriver();
+                                                                                                                                                            })
+                                                                                                                                                            .catch(function(err) {
+                                                                                                                                                                console.log(err);
+                                                                                                                                                            });
                                                                                                                                                     });
                                                                                                                                             })
                                                                                                                                             .catch(function(correctAnswer4Err) {
-                                                                                                                                                console.log(correctAnswer4Err);
+                                                                                                                                                goToAssignment(true)
+                                                                                                                                                    .then(function() {
+                                                                                                                                                        stringWordCount = 1;
+                                                                                                                                                        numAchieve = 0;
+                                                                                                                                                        assignmentDriver();
+                                                                                                                                                    })
+                                                                                                                                                    .catch(function(err) {
+                                                                                                                                                        console.log(err);
+                                                                                                                                                    });
                                                                                                                                             });
                                                                                                                                     })
                                                                                                                                     .catch(function(isCorrect4Err) {
-                                                                                                                                        console.log(isCorrect4Err);
+                                                                                                                                        goToAssignment(true)
+                                                                                                                                            .then(function() {
+                                                                                                                                                stringWordCount = 1;
+                                                                                                                                                numAchieve = 0;
+                                                                                                                                                assignmentDriver();
+                                                                                                                                            })
+                                                                                                                                            .catch(function(err) {
+                                                                                                                                                console.log(err);
+                                                                                                                                            });
                                                                                                                                     })
                                                                                                                             })
                                                                                                                             .catch(function(randomNumber4Err) {
-                                                                                                                                console.log(randomNumber4Err);
+                                                                                                                                goToAssignment(true)
+                                                                                                                                    .then(function() {
+                                                                                                                                        stringWordCount = 1;
+                                                                                                                                        numAchieve = 0;
+                                                                                                                                        assignmentDriver();
+                                                                                                                                    })
+                                                                                                                                    .catch(function(err) {
+                                                                                                                                        console.log(err);
+                                                                                                                                    });
                                                                                                                             });
                                                                                                                     }
                                                                                                                 })
                                                                                                                 .catch(function(isCorrect3Err) {
-                                                                                                                    console.log(isCorrect3Err);
+                                                                                                                    goToAssignment(true)
+                                                                                                                        .then(function() {
+                                                                                                                            stringWordCount = 1;
+                                                                                                                            numAchieve = 0;
+                                                                                                                            assignmentDriver();
+                                                                                                                        })
+                                                                                                                        .catch(function(err) {
+                                                                                                                            console.log(err);
+                                                                                                                        });
                                                                                                                 });
                                                                                                         })
                                                                                                         .catch(function(randomNumber3Err) {
-                                                                                                            console.log(randomNumber3Err);
+                                                                                                            goToAssignment(true)
+                                                                                                                .then(function() {
+                                                                                                                    stringWordCount = 1;
+                                                                                                                    numAchieve = 0;
+                                                                                                                    assignmentDriver();
+                                                                                                                })
+                                                                                                                .catch(function(err) {
+                                                                                                                    console.log(err);
+                                                                                                                });
                                                                                                         });
                                                                                                 }
                                                                                             })
                                                                                             .catch(function(isCorrect2Err) {
-                                                                                                console.log(isCorrect2Err);
+                                                                                                goToAssignment(true)
+                                                                                                    .then(function() {
+                                                                                                        stringWordCount = 1;
+                                                                                                        numAchieve = 0;
+                                                                                                        assignmentDriver();
+                                                                                                    })
+                                                                                                    .catch(function(err) {
+                                                                                                        console.log(err);
+                                                                                                    });
                                                                                             })
                                                                                     })
                                                                                     .catch(function(randomNumber2Err) {
-                                                                                        console.log(randomNumber2Err);
+                                                                                        goToAssignment(true)
+                                                                                            .then(function() {
+                                                                                                stringWordCount = 1;
+                                                                                                numAchieve = 0;
+                                                                                                assignmentDriver();
+                                                                                            })
+                                                                                            .catch(function(err) {
+                                                                                                console.log(err);
+                                                                                            });
                                                                                     });
                                                                             }
                                                                         })
                                                                         .catch(function(isCorrect1Err) {
-                                                                            console.log(isCorrect1Err);
+                                                                            goToAssignment(true)
+                                                                                .then(function() {
+                                                                                    stringWordCount = 1;
+                                                                                    numAchieve = 0;
+                                                                                    assignmentDriver();
+                                                                                })
+                                                                                .catch(function(err) {
+                                                                                    console.log(err);
+                                                                                });
                                                                         })
                                                                 })
                                                                 .catch(function(randomNumber1Err) {
-                                                                    console.log(randomNumber1Err);
+                                                                    goToAssignment(true)
+                                                                        .then(function() {
+                                                                            stringWordCount = 1;
+                                                                            numAchieve = 0;
+                                                                            assignmentDriver();
+                                                                        })
+                                                                        .catch(function(err) {
+                                                                            console.log(err);
+                                                                        });
                                                                 });
                                                         }
                                                     })
                                                     .catch(function(err5) {
-                                                        console.log(err5);
+                                                        goToAssignment(true)
+                                                            .then(function() {
+                                                                stringWordCount = 1;
+                                                                numAchieve = 0;
+                                                                assignmentDriver();
+                                                            })
+                                                            .catch(function(err) {
+                                                                console.log(err);
+                                                            });
                                                     });
                                             })
                                             .catch(function(err4) {
-                                                console.log(err4);
+                                                goToAssignment(true)
+                                                    .then(function() {
+                                                        stringWordCount = 1;
+                                                        numAchieve = 0;
+                                                        assignmentDriver();
+                                                    })
+                                                    .catch(function(err) {
+                                                        console.log(err);
+                                                    });
                                             });
                                     })
                                     .catch(function(err3) {
-                                        console.log(err3);
+                                        goToAssignment(true)
+                                            .then(function() {
+                                                stringWordCount = 1;
+                                                numAchieve = 0;
+                                                assignmentDriver();
+                                            })
+                                            .catch(function(err) {
+                                                console.log(err);
+                                            });
                                     });
                             })
                             .catch(function(err2) {
-                                console.log(err2);
+                                goToAssignment(true)
+                                    .then(function() {
+                                        stringWordCount = 1;
+                                        numAchieve = 0;
+                                        assignmentDriver();
+                                    })
+                                    .catch(function(err) {
+                                        console.log(err);
+                                    });
                             });
                     })
                     .catch(function(err1) {
-                        console.log(err1);
+                        goToAssignment(true)
+                            .then(function() {
+                                stringWordCount = 1;
+                                numAchieve = 0;
+                                assignmentDriver();
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     });
             })
             .catch(function(err) {
-                console.log(err);
+                goToAssignment(true)
+                    .then(function() {
+                        stringWordCount = 1;
+                        numAchieve = 0;
+                        assignmentDriver();
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    });
             });
     });
 }
@@ -1530,11 +2791,27 @@ function guessRandomOppositeWord() {
                             fufill(randomChoice);
                         })
                         .catch(function(errClick) {
-                            console.log(errClick);
+                            goToAssignment(true)
+                                .then(function() {
+                                    stringWordCount = 1;
+                                    numAchieve = 0;
+                                    assignmentDriver();
+                                })
+                                .catch(function(err) {
+                                    console.log(err);
+                                });
                         });
                 })
                 .catch(function(err) {
-                    reject(err);
+                    goToAssignment(true)
+                        .then(function() {
+                            stringWordCount = 1;
+                            numAchieve = 0;
+                            assignmentDriver();
+                        })
+                        .catch(function(err) {
+                            console.log(err);
+                        });
                 });
         }, 2000);
     });
@@ -1560,11 +2837,27 @@ function guessRandomImageWord() {
                             fufill(randomChoice);
                         })
                         .catch(function(errClick) {
-                            console.log(errClick);
+                            goToAssignment(true)
+                                .then(function() {
+                                    stringWordCount = 1;
+                                    numAchieve = 0;
+                                    assignmentDriver();
+                                })
+                                .catch(function(err) {
+                                    console.log(err);
+                                });
                         });
                 })
                 .catch(function(err) {
-                    reject(err);
+                    goToAssignment(true)
+                        .then(function() {
+                            stringWordCount = 1;
+                            numAchieve = 0;
+                            assignmentDriver();
+                        })
+                        .catch(function(err) {
+                            console.log(err);
+                        });
                 });
         }, 2000);
     });
@@ -1584,12 +2877,20 @@ function guessRandomStringWord() {
 
             driver.findElement(By.xpath('//*[@id="challenge"]/div/div[1]/div' + countString + '/div/div/section[1]/div[1]/div[4]/a[' + randomChoice + ']')).click()
                 .then(function(resp) {
-                            tempChoices.splice(randomNumber, 1);
-                            console.log(tempChoices);
-                            fufill(randomChoice);
+                    tempChoices.splice(randomNumber, 1);
+                    console.log(tempChoices);
+                    fufill(randomChoice);
                 })
                 .catch(function(err) {
-                    reject(err);
+                    goToAssignment(true)
+                        .then(function() {
+                            stringWordCount = 1;
+                            numAchieve = 0;
+                            assignmentDriver();
+                        })
+                        .catch(function(err) {
+                            console.log(err);
+                        });
                 });
         }, 2000);
     });
@@ -1610,7 +2911,15 @@ function extractCorrectStringWord(correctIndex) {
                     fufill(text);
                 })
                 .catch(function(err) {
-                    reject(err);
+                    goToAssignment(true)
+                        .then(function() {
+                            stringWordCount = 1;
+                            numAchieve = 0;
+                            assignmentDriver();
+                        })
+                        .catch(function(err) {
+                            console.log(err);
+                        });
                 });
         }, 250);
     });
@@ -1865,8 +3174,8 @@ function login(username, password) {
     driver.get('https://www.vocabulary.com/login');
     return new Promise(function(fufill, reject) {
         driver.wait(until.elementLocated(By.name('username')), 100000, 'Could not locate the child element within the time specified').then(function() {
-            driver.findElement(By.name('username')).sendKeys(config.user.username);
-            driver.findElement(By.name('password')).sendKeys(config.user.password);
+            driver.findElement(By.name('username')).sendKeys(config.login.username);
+            driver.findElement(By.name('password')).sendKeys(config.login.password);
             driver.findElement(By.xpath('//*[@id="loginform"]/div[6]/button')).click().then(function() {
                 fufill();
             });
@@ -1902,27 +3211,30 @@ function getToken() {
     });
 }
 
-function goToAssignment() {
+function goToAssignment(isRedirect) {
     return new Promise(function(fufill, reject) {
-        if (config.settings.lessonURL.includes('practice')) {
-            driver.get(config.settings.lessonURL)
-                .then(function() {
-                    fufill();
-                })
-                .catch(function(err) {
-                    reject(err);
-                });
+        if(isRedirect){
+            driver.navigate().refresh();
         } else {
-            config.settings.lessonURL = config.settings.lessonURL + '/practice';
-            driver.get(config.settings.lessonURL)
-                .then(function() {
-                    fufill();
-                })
-                .catch(function(err) {
-                    reject(err);
-                });
+            if (config.settings.lessonURL.includes('practice')) {
+                driver.get(config.settings.lessonURL)
+                    .then(function() {
+                        fufill();
+                    })
+                    .catch(function(err) {
+                        reject(err);
+                    });
+            } else {
+                config.settings.lessonURL = config.settings.lessonURL + '/practice';
+                driver.get(config.settings.lessonURL)
+                    .then(function() {
+                        fufill();
+                    })
+                    .catch(function(err) {
+                        reject(err);
+                    });
+            }
         }
-
     });
 
 }
@@ -2075,23 +3387,23 @@ function getCurrentTask() {
             body: qs.stringify(postData)
         }
         request(options)
-        .then(function(respo) {
-            var resp = JSON.parse(respo);
-            queueObject = resp;
-            console.log(JSON.parse(respo));
-            config.login.username = resp[0].config.apiLogin.username;
-            config.login.password = resp[0].config.apiLogin.password;
-            config.user.username = resp[0].config.user.username;
-            config.user.password = resp[0].config.user.password;
-            config.settings.lessonURL = resp[0].config.assignmentURL;
-            fufill(resp);
-        })
-        .catch(function(error) {
-            reject(error);
-        });
+            .then(function(respo) {
+                var resp = JSON.parse(respo);
+                queueObject = resp;
+                console.log(JSON.parse(respo));
+                config.user.username = resp[0].config.apiLogin.username;
+                config.user.password = resp[0].config.apiLogin.password;
+                config.login.username = resp[0].config.user.username;
+                config.login.password = resp[0].config.user.password;
+                config.settings.lessonURL = resp[0].config.assignmentURL;
+                fufill(resp);
+            })
+            .catch(function(error) {
+                reject(error);
+            });
     });
 }
-
+/*
 function countNumberQuestions() {
     return new Promise(function(fufill, reject) {
         driver.findElement(By.xpath('//*[@id="challenge"]/div/footer/div[2]/ul'))
@@ -2112,7 +3424,7 @@ function countNumberQuestions() {
                 console.log(errElements);
             });
     });
-}
+} */
 
 function occurrences(string, subString, allowOverlapping) {
 
@@ -2132,4 +3444,25 @@ function occurrences(string, subString, allowOverlapping) {
         } else break;
     }
     return n;
+}
+
+function isComplete() {
+    return new Promise(function(fufill, reject) {
+        driver.findElements(By.className('practiceComplete'))
+            .then(function(resp) {
+                if (resp.length != 0) {
+                    fufill(true);
+                } else {
+                    fufill(false);
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            });
+    });
+}
+
+function refreshAndReset() {
+
 }

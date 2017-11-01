@@ -1,16 +1,15 @@
 module.exports =
 {
-    database : 'mongodb://localhost:27017/VocabBot',
     login : {
-        username: 'sam41075',
-        password: 'test'
+        username: '',
+        password: ''
     },
     user: {
-        username: 'samc735@gmail.com',
-        password: 'sam42182'
+        username: '',
+        password: ''
     },
     settings: {
-        lessonURL: 'https://www.vocabulary.com/lists/1806744/practice'
+        lessonURL: ''
     },
     api: {
         url: 'http://localhost:3000'
