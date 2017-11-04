@@ -2424,7 +2424,7 @@ function answerOppositeWord() {
                                                                                         isCorrectMultipleChoice()
                                                                                             .then(function (isCorrect2) {
                                                                                                 if (isCorrect2) {
-                                                                                                    extractCorrectOppositeWord(randomNumber1)
+                                                                                                    extractCorrectOppositeWord(randomNumber2)
                                                                                                         .then(function (correctAnswer2) {
                                                                                                             stringWordCount++;
                                                                                                             saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer2)
@@ -2461,7 +2461,7 @@ function answerOppositeWord() {
                                                                                                             isCorrectMultipleChoice()
                                                                                                                 .then(function (isCorrect3) {
                                                                                                                     if (isCorrect3) {
-                                                                                                                        extractCorrectOppositeWord(randomNumber1)
+                                                                                                                        extractCorrectOppositeWord(randomNumber3)
                                                                                                                             .then(function (correctAnswer3) {
                                                                                                                                 stringWordCount++;
                                                                                                                                 saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer3)
@@ -2486,7 +2486,7 @@ function answerOppositeWord() {
                                                                                                                             .then(function (randomNumber4) {
                                                                                                                                 isCorrectMultipleChoice()
                                                                                                                                     .then(function (isCorrect4) {
-                                                                                                                                        extractCorrectOppositeWord(randomNumber1)
+                                                                                                                                        extractCorrectOppositeWord(randomNumber4)
                                                                                                                                             .then(function (correctAnswer4) {
                                                                                                                                                 stringWordCount++;
                                                                                                                                                 saveOppositeWord(prompt, a1, a2, a3, a4, config.settings.lessonURL, config.login.username, correctAnswer4)
@@ -3507,14 +3507,16 @@ function setComplete(completePercent) {
     return new Promise(function (fufill, reject) {
         var postData = {
             token: apiToken,
-            completepercent: completePercent
+            completepercent: parseInt(completePercent),
+            id: queueObject[0]._id
         };
         console.log('Saving imageWord to DB'.blue);
+        console.log(queueObject);
         const options = {
             headers: {
                 'content-type': 'application/x-www-form-urlencoded'
             },
-            uri: config.api.url + '/queue/completeTask/' + queueObject._id,
+            uri: config.api.url + '/queue/completeTask/',
             method: 'POST',
             body: qs.stringify(postData)
         }
