@@ -24,7 +24,7 @@
   "homepage": "https://github.com/Slashroot101/VocabBot#readme",
   "dependencies": {
     "async": "^2.5.0",
-    "chromedriver": "^2.31.0",
+    "chromedriver": "^2.33.2",
     "colors": "^1.1.2",
     "moment": "^2.18.1",
     "mongoose": "^4.11.7",

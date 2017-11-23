@@ -3422,15 +3422,19 @@ function getCurrentTask() {
         }
         request(options)
             .then(function (respo) {
-                var resp = JSON.parse(respo);
-                queueObject = resp;
-                config.user.username = resp[0].config.apiLogin.username;
-                config.user.password = resp[0].config.apiLogin.password;
-                config.login.username = resp[0].config.user.username;
-                config.login.password = resp[0].config.user.password;
-                config.settings.lessonURL = resp[0].config.assignmentURL;
-                console.log(config);
-                fufill(resp);
+                try {
+                    var resp = JSON.parse(respo);
+                    queueObject = resp;
+                    config.user.username = resp[0].config.apiLogin.username;
+                    config.user.password = resp[0].config.apiLogin.password;
+                    config.login.username = resp[0].config.user.username;
+                    config.login.password = resp[0].config.user.password;
+                    config.settings.lessonURL = resp[0].config.assignmentURL;
+                    console.log(config);
+                    fufill(resp);
+                } catch (err){
+                    driver.quit();
+                }
             })
             .catch(function (error) {
                 reject(error);
