@@ -6,6 +6,7 @@ logging = webdriver.logging,
     until = webdriver.until,
     path = require('path'),
     By = webdriver.By;
+
 var chrome = require('selenium-webdriver/chrome');
 var moment = require('moment');
 var path = require('chromedriver').path;
@@ -3432,6 +3433,7 @@ function getCurrentTask() {
                     config.settings.lessonURL = resp[0].config.assignmentURL;
                     console.log(config);
                     fufill(resp);
+
                 } catch (err){
                     driver.quit();
                 }
