@@ -3058,6 +3058,7 @@ function saveParagraphWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAn
             })
             .catch(function (error) {
                 console.log('ERROR');
+                console.log(error);
                 reject(error);
             });
     });
@@ -3091,6 +3092,7 @@ function saveOppositeWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAns
                 fufill();
             })
             .catch(function (error) {
+                console.log(error);
                 console.log('ERROR');
                 reject(error);
             });
@@ -3127,6 +3129,7 @@ function saveImageWord(prompt, a1, a2, a3, a4, lessonURL, addedBy, correctAnswer
             })
             .catch(function (error) {
                 console.log('ERROR');
+                console.log(error);
                 reject(error);
             });
     });
@@ -3400,6 +3403,7 @@ function saveAudioWord(prompt, correctAnswer) {
                 fufill();
             })
             .catch(function (error) {
+                console.log(error);
                 console.log('ERROR');
                 reject(error);
             });
@@ -3409,22 +3413,19 @@ function saveAudioWord(prompt, correctAnswer) {
 
 function getCurrentTask() {
     return new Promise(function (fufill, reject) {
-        var postData = {
-            token: apiToken
-        };
-        console.log('Saving imageWord to DB'.blue);
+        console.log(config.api.url + '/queue/currentTask');
         const options = {
             headers: {
                 'content-type': 'application/x-www-form-urlencoded'
             },
             uri: config.api.url + '/queue/currentTask',
-            method: 'GET',
-            body: qs.stringify(postData)
+            method: 'GET'
         }
         request(options)
             .then(function (respo) {
                 try {
                     var resp = JSON.parse(respo);
+                    console.log(resp);
                     queueObject = resp;
                     config.user.username = resp[0].config.apiLogin.username;
                     config.user.password = resp[0].config.apiLogin.password;
@@ -3435,10 +3436,12 @@ function getCurrentTask() {
                     fufill(resp);
 
                 } catch (err){
+                    console.log(err);
                     driver.quit();
                 }
             })
             .catch(function (error) {
+                console.log(error);
                 reject(error);
             });
     });
@@ -3531,7 +3534,7 @@ function setComplete(completePercent) {
                 fufill();
             })
             .catch(function (error) {
-                console.log('ERROR');
+                console.log(error);
                 reject(error);
             });
     });
